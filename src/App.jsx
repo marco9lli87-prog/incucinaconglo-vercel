@@ -1,13 +1,16 @@
 import { useState } from 'react'
 import Home from './Home'
+import Splash from './components/Splash'
 
 export default function App() {
+  const hasSeenSplash = localStorage.getItem('seenSplash')
+  const [showSplash, setShowSplash] = useState(!hasSeenSplash)
+
   const [cart, setCart] = useState([])
 
   const addToCart = product => {
     setCart(prev => {
       const existing = prev.find(i => i.product.id === product.id)
-
       if (existing) {
         return prev.map(i =>
           i.product.id === product.id
@@ -15,7 +18,6 @@ export default function App() {
             : i
         )
       }
-
       return [...prev, { product, qty: 1 }]
     })
   }
@@ -39,14 +41,8 @@ export default function App() {
 
   const itemsCount = cart.reduce((sum, i) => sum + i.qty, 0)
 
-  const qtyBtn = {
-    background: '#222',
-    border: '1px solid #333',
-    color: '#d4af37',
-    width: 28,
-    height: 28,
-    borderRadius: 6,
-    cursor: 'pointer'
+  if (showSplash) {
+    return <Splash onFinish={() => setShowSplash(false)} />
   }
 
   return (
@@ -83,42 +79,14 @@ export default function App() {
               >
                 <span>{item.product.name}</span>
 
-                <div style={{ display: 'flex', gap: '.5rem', alignItems: 'center' }}>
-                  <button
-                    onClick={() => decreaseQty(item.product.id)}
-                    style={qtyBtn}
-                  >
-                    −
-                  </button>
-
+                <div style={{ display: 'flex', gap: '.5rem' }}>
+                  <button onClick={() => decreaseQty(item.product.id)}>−</button>
                   <span>{item.qty}</span>
-
-                  <button
-                    onClick={() => addToCart(item.product)}
-                    style={qtyBtn}
-                  >
-                    +
-                  </button>
+                  <button onClick={() => addToCart(item.product)}>+</button>
                 </div>
               </div>
             ))}
           </div>
-
-          <button
-            style={{
-              marginTop: '1rem',
-              width: '100%',
-              padding: '0.75rem',
-              background: '#d4af37',
-              color: '#111',
-              fontWeight: 600,
-              border: 'none',
-              borderRadius: 8,
-              cursor: 'pointer'
-            }}
-          >
-            Procedi all’ordine
-          </button>
         </div>
       )}
     </>
