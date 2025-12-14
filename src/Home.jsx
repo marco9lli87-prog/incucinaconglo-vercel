@@ -4,44 +4,48 @@ import { supabase } from './lib/supabase'
 export default function Home({ onAdd }) {
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
 
   useEffect(() => {
-    const loadProducts = async () => {
-      const { data, error } = await supabase
+    const load = async () => {
+      const { data } = await supabase
         .from('products')
         .select('*')
         .eq('active', true)
         .order('name')
 
-      if (error) setError(error.message)
-      else setProducts(data)
-
+      setProducts(data || [])
       setLoading(false)
     }
 
-    loadProducts()
+    load()
   }, [])
 
   return (
-    <main style={{ padding: '1.5rem', maxWidth: 1200, margin: '0 auto', paddingBottom: '6rem' }}>
-      <header style={{ marginBottom: '2rem' }}>
-        <h1 style={{ color: 'var(--gold)', fontSize: '2rem', marginBottom: '.5rem' }}>
-          In Cucina con Glò
-        </h1>
-        <p style={{ color: 'var(--muted)' }}>
-          Pasta fresca artigianale, fatta a mano 🍝
+    <main
+      style={{
+        padding: '1.5rem',
+        maxWidth: 430,
+        margin: '0 auto',
+        paddingBottom: '7rem'
+      }}
+    >
+      {/* HERO */}
+      <section className="hero">
+        <h1>IN CUCINA<br />CON GLÒ</h1>
+        <p>
+          Pasta fresca artigianale<br />
+          Ritiro in loco o consegna concordata
         </p>
-      </header>
+      </section>
 
-      {loading && <p>Caricamento prodotti…</p>}
-      {error && <p style={{ color: 'tomato' }}>{error}</p>}
+      {loading && <p>Caricamento…</p>}
 
+      {/* PRODOTTI */}
       <section
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
-          gap: '1.5rem'
+          gridTemplateColumns: '1fr 1fr',
+          gap: '1.25rem'
         }}
       >
         {products.map(product => (
@@ -49,51 +53,59 @@ export default function Home({ onAdd }) {
             key={product.id}
             style={{
               background: 'var(--card)',
-              borderRadius: 12,
+              borderRadius: 14,
               overflow: 'hidden',
-              display: 'flex',
-              flexDirection: 'column'
+              textAlign: 'center'
             }}
           >
-            <div style={{ aspectRatio: '1 / 1', overflow: 'hidden' }}>
-              {product.image_url ? (
-                <img
-                  src={product.image_url}
-                  alt={product.name}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                />
-              ) : (
-                <div
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    background: '#333',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: '#777'
-                  }}
-                >
-                  Nessuna immagine
-                </div>
-              )}
+            {/* IMMAGINE */}
+            <div style={{ aspectRatio: '1 / 1' }}>
+              <img
+                src={product.image_url}
+                alt={product.name}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover'
+                }}
+              />
             </div>
 
-            <div style={{ padding: '1rem', flexGrow: 1 }}>
-              <h3 style={{ marginBottom: '.25rem' }}>{product.name}</h3>
-              <p style={{ color: 'var(--gold)', fontWeight: 600 }}>
-                € {product.price}
+            {/* TESTO */}
+            <div style={{ padding: '0.75rem 0.75rem 0.5rem' }}>
+              <h3
+                style={{
+                  fontSize: '1rem',
+                  fontWeight: 500,
+                  marginBottom: '.25rem'
+                }}
+              >
+                {product.name}
+              </h3>
+
+              <p
+                style={{
+                  color: 'var(--gold)',
+                  fontSize: '.9rem',
+                  marginBottom: '.5rem'
+                }}
+              >
+                € {product.price} / kg
               </p>
             </div>
 
+            {/* CTA */}
             <button
               onClick={() => onAdd(product)}
               style={{
-                border: 'none',
-                padding: '0.75rem',
+                margin: '0.5rem',
+                width: 'calc(100% - 1rem)',
+                padding: '0.6rem',
                 background: 'var(--gold)',
                 color: '#111',
                 fontWeight: 600,
+                border: 'none',
+                borderRadius: 8,
                 cursor: 'pointer'
               }}
             >
