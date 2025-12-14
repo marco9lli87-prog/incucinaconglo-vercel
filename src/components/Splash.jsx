@@ -23,11 +23,27 @@ export default function Splash({ onFinish }) {
         zIndex: 9999
       }}
     >
-      <img
-        src="/logo.png"
-        alt="In Cucina con Glò"
-        className="splash-logo"
-      />
+      <div style={{ textAlign: 'center' }}>
+        {/* FRUSTA */}
+        <img
+          src="/frusta.png"
+          alt=""
+          className="splash-frusta"
+        />
+
+        {/* TESTO */}
+        <h1
+          style={{
+            marginTop: '1.25rem',
+            color: '#d4af37',
+            fontFamily: 'Cinzel, serif',
+            letterSpacing: '0.15em',
+            fontSize: '1.1rem'
+          }}
+        >
+          IN CUCINA CON GLÒ
+        </h1>
+      </div>
     </div>
   )
 }
