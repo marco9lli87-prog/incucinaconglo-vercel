@@ -5,7 +5,6 @@ export default function Home({ onAdd }) {
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  
 
   useEffect(() => {
     const loadProducts = async () => {
@@ -25,8 +24,7 @@ export default function Home({ onAdd }) {
   }, [])
 
   return (
-    <main style={{ padding: '1.5rem', maxWidth: 1200, margin: '0 auto' }}>
-      {/* HEADER */}
+    <main style={{ padding: '1.5rem', maxWidth: 1200, margin: '0 auto', paddingBottom: '6rem' }}>
       <header style={{ marginBottom: '2rem' }}>
         <h1 style={{ color: 'var(--gold)', fontSize: '2rem', marginBottom: '.5rem' }}>
           In Cucina con Glò
@@ -36,11 +34,9 @@ export default function Home({ onAdd }) {
         </p>
       </header>
 
-      {/* STATES */}
       {loading && <p>Caricamento prodotti…</p>}
       {error && <p style={{ color: 'tomato' }}>{error}</p>}
 
-      {/* GRID */}
       <section
         style={{
           display: 'grid',
@@ -59,7 +55,6 @@ export default function Home({ onAdd }) {
               flexDirection: 'column'
             }}
           >
-            {/* IMAGE */}
             <div style={{ aspectRatio: '1 / 1', overflow: 'hidden' }}>
               {product.image_url ? (
                 <img
@@ -84,7 +79,6 @@ export default function Home({ onAdd }) {
               )}
             </div>
 
-            {/* CONTENT */}
             <div style={{ padding: '1rem', flexGrow: 1 }}>
               <h3 style={{ marginBottom: '.25rem' }}>{product.name}</h3>
               <p style={{ color: 'var(--gold)', fontWeight: 600 }}>
@@ -92,21 +86,19 @@ export default function Home({ onAdd }) {
               </p>
             </div>
 
-            {/* CTA */}
             <button
-  onClick={() => onAdd(product)}
-  style={{
-    border: 'none',
-    padding: '0.75rem',
-    background: 'var(--gold)',
-    color: '#111',
-    fontWeight: 600,
-    cursor: 'pointer'
-  }}
->
-  Aggiungi
-</button>
-
+              onClick={() => onAdd(product)}
+              style={{
+                border: 'none',
+                padding: '0.75rem',
+                background: 'var(--gold)',
+                color: '#111',
+                fontWeight: 600,
+                cursor: 'pointer'
+              }}
+            >
+              Aggiungi
+            </button>
           </article>
         ))}
       </section>
