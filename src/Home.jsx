@@ -1,41 +1,112 @@
-import { supabase } from './lib/supabase'
 import { useEffect, useState } from 'react'
+import { supabase } from './lib/supabase'
 
 export default function Home() {
   const [products, setProducts] = useState([])
+  const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
   useEffect(() => {
-    const load = async () => {
+    const loadProducts = async () => {
       const { data, error } = await supabase
         .from('products')
         .select('*')
         .eq('active', true)
+        .order('name')
 
       if (error) setError(error.message)
       else setProducts(data)
+
+      setLoading(false)
     }
-    load()
+
+    loadProducts()
   }, [])
 
   return (
-    <div style={{ minHeight: '100vh', background: '#111', color: '#d4af37', padding: '2rem' }}>
-      <h1>In Cucina con Glò 🍝</h1>
-      <p>Home minimale con Supabase collegato</p>
+    <main style={{ padding: '1.5rem', maxWidth: 1200, margin: '0 auto' }}>
+      {/* HEADER */}
+      <header style={{ marginBottom: '2rem' }}>
+        <h1 style={{ color: 'var(--gold)', fontSize: '2rem', marginBottom: '.5rem' }}>
+          In Cucina con Glò
+        </h1>
+        <p style={{ color: 'var(--muted)' }}>
+          Pasta fresca artigianale, fatta a mano 🍝
+        </p>
+      </header>
 
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+      {/* STATES */}
+      {loading && <p>Caricamento prodotti…</p>}
+      {error && <p style={{ color: 'tomato' }}>{error}</p>}
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem', marginTop: '2rem' }}>
-        {products.map(p => (
-          <div key={p.id} style={{ background: '#1a1a1a', padding: '1rem', borderRadius: '8px' }}>
-            {p.image_url && (
-              <img src={p.image_url} alt={p.name} style={{ width: '100%', borderRadius: '6px' }} />
-            )}
-            <h3>{p.name}</h3>
-            <p>€ {p.price}</p>
-          </div>
+      {/* GRID */}
+      <section
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
+          gap: '1.5rem'
+        }}
+      >
+        {products.map(product => (
+          <article
+            key={product.id}
+            style={{
+              background: 'var(--card)',
+              borderRadius: 12,
+              overflow: 'hidden',
+              display: 'flex',
+              flexDirection: 'column'
+            }}
+          >
+            {/* IMAGE */}
+            <div style={{ aspectRatio: '1 / 1', overflow: 'hidden' }}>
+              {product.image_url ? (
+                <img
+                  src={product.image_url}
+                  alt={product.name}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
+              ) : (
+                <div
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    background: '#333',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#777'
+                  }}
+                >
+                  Nessuna immagine
+                </div>
+              )}
+            </div>
+
+            {/* CONTENT */}
+            <div style={{ padding: '1rem', flexGrow: 1 }}>
+              <h3 style={{ marginBottom: '.25rem' }}>{product.name}</h3>
+              <p style={{ color: 'var(--gold)', fontWeight: 600 }}>
+                € {product.price}
+              </p>
+            </div>
+
+            {/* CTA */}
+            <button
+              style={{
+                border: 'none',
+                padding: '0.75rem',
+                background: 'var(--gold)',
+                color: '#111',
+                fontWeight: 600,
+                cursor: 'pointer'
+              }}
+            >
+              Aggiungi
+            </button>
+          </article>
         ))}
-      </div>
-    </div>
+      </section>
+    </main>
   )
 }
