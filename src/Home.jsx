@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './lib/supabase'
 
-export default function Home() {
+export default function Home({ onAdd }) {
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  
 
   useEffect(() => {
     const loadProducts = async () => {
@@ -93,17 +94,19 @@ export default function Home() {
 
             {/* CTA */}
             <button
-              style={{
-                border: 'none',
-                padding: '0.75rem',
-                background: 'var(--gold)',
-                color: '#111',
-                fontWeight: 600,
-                cursor: 'pointer'
-              }}
-            >
-              Aggiungi
-            </button>
+  onClick={() => onAdd(product)}
+  style={{
+    border: 'none',
+    padding: '0.75rem',
+    background: 'var(--gold)',
+    color: '#111',
+    fontWeight: 600,
+    cursor: 'pointer'
+  }}
+>
+  Aggiungi
+</button>
+
           </article>
         ))}
       </section>
