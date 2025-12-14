@@ -65,18 +65,12 @@ export default function Home({ onAdd }) {
           >
             {/* IMMAGINE */}
             <div className="image-wrapper">
-              {!loadedImages[product.id] && (
-                <div className="image-skeleton" />
-              )}
 
               <img
-                src={`${product.image_url}}
+                src={product.image_url}
                 alt={product.name}
                 loading="lazy"
-                onLoad={() => onImageLoad(product.id)}
-                className={`product-image ${
-                  loadedImages[product.id] ? 'loaded' : ''
-                }`}
+                className="product-image"
               />
             </div>
 
