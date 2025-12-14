@@ -70,8 +70,7 @@ export default function Home({ onAdd }) {
               )}
 
               <img
-  src={`${product.image_url}?width=600&quality=80`}
-
+                src={`${product.image_url}}
                 alt={product.name}
                 loading="lazy"
                 onLoad={() => onImageLoad(product.id)}
