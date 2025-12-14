@@ -4,6 +4,7 @@ import { supabase } from './lib/supabase'
 export default function Home({ onAdd }) {
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
+  const [loadedImages, setLoadedImages] = useState({})
 
   useEffect(() => {
     const load = async () => {
@@ -19,6 +20,10 @@ export default function Home({ onAdd }) {
 
     load()
   }, [])
+
+  const onImageLoad = id => {
+    setLoadedImages(prev => ({ ...prev, [id]: true }))
+  }
 
   return (
     <main
@@ -38,7 +43,7 @@ export default function Home({ onAdd }) {
         </p>
       </section>
 
-      {loading && <p>Caricamento…</p>}
+      {loading && <p>Caricamento prodotti…</p>}
 
       {/* PRODOTTI */}
       <section
@@ -59,27 +64,25 @@ export default function Home({ onAdd }) {
             }}
           >
             {/* IMMAGINE */}
-            <div style={{ aspectRatio: '1 / 1' }}>
+            <div className="image-wrapper">
+              {!loadedImages[product.id] && (
+                <div className="image-skeleton" />
+              )}
+
               <img
                 src={product.image_url}
                 alt={product.name}
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover'
-                }}
+                loading="lazy"
+                onLoad={() => onImageLoad(product.id)}
+                className={`product-image ${
+                  loadedImages[product.id] ? 'loaded' : ''
+                }`}
               />
             </div>
 
             {/* TESTO */}
             <div style={{ padding: '0.75rem 0.75rem 0.5rem' }}>
-              <h3
-                style={{
-                  fontSize: '1rem',
-                  fontWeight: 500,
-                  marginBottom: '.25rem'
-                }}
-              >
+              <h3 style={{ fontSize: '1rem', fontWeight: 500 }}>
                 {product.name}
               </h3>
 
@@ -87,7 +90,7 @@ export default function Home({ onAdd }) {
                 style={{
                   color: 'var(--gold)',
                   fontSize: '.9rem',
-                  marginBottom: '.5rem'
+                  margin: '.25rem 0 .5rem'
                 }}
               >
                 € {product.price} / kg
