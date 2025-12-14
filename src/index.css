@@ -77,4 +77,25 @@ img {
   display: block;
 }
 
+/* SPLASH */
+.splash-logo {
+  width: 180px;
+  animation: spoonRotate 2s ease-in-out;
+}
+
+/* movimento delicato */
+@keyframes spoonRotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  30% {
+    transform: rotate(-3deg);
+  }
+  60% {
+    transform: rotate(3deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
 
