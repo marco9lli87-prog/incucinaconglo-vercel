@@ -174,18 +174,41 @@ img {
   padding: 2rem 0;
 }
 
-/* CHECKOUT */
-.checkout {
+
+/* CHECKOUT – BOTTOM SHEET */
+
+.checkout-overlay {
   position: fixed;
   inset: 0;
-  background: var(--bg);
-  padding: 1.5rem;
+  background: rgba(0, 0, 0, 0.5);
   z-index: 50;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
 }
 
-.checkout h2 {
+.checkout-sheet {
+  width: 100%;
+  max-width: 480px;
+  background: var(--bg);
+  border-radius: 20px 20px 0 0;
+  padding: 1.25rem;
+  animation: slideUp 0.3s ease-out;
+}
+
+/* maniglietta */
+.sheet-handle {
+  width: 40px;
+  height: 4px;
+  background: #333;
+  border-radius: 2px;
+  margin: 0 auto 0.75rem;
+}
+
+.checkout-sheet h2 {
   color: var(--gold);
   margin-bottom: 1rem;
+  text-align: center;
 }
 
 .checkout-row {
@@ -198,35 +221,46 @@ img {
 .checkout-total {
   margin: 1rem 0;
   font-weight: 600;
+  text-align: right;
 }
 
-.checkout input,
-.checkout textarea {
+.checkout-sheet input,
+.checkout-sheet textarea {
   width: 100%;
   background: #1a1a1a;
   border: 1px solid #333;
   color: white;
   padding: 0.6rem;
-  border-radius: 8px;
+  border-radius: 10px;
   margin-bottom: 0.6rem;
 }
 
-.checkout textarea {
+.checkout-sheet textarea {
   resize: none;
   height: 70px;
 }
 
-.checkout button {
+.checkout-sheet button {
   width: 100%;
-  padding: 0.7rem;
-  border-radius: 10px;
+  padding: 0.75rem;
+  border-radius: 12px;
   border: none;
   background: var(--gold);
   color: #000;
   margin-top: 0.5rem;
 }
 
-.checkout .link {
+.checkout-sheet .link {
   background: none;
   color: var(--muted);
+}
+
+/* animazione */
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
 }
