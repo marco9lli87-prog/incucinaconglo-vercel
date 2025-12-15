@@ -6,10 +6,17 @@ export default function Checkout({ cart, onClose, onClear }) {
   const [phone, setPhone] = useState('')
   const [note, setNote] = useState('')
   const [loading, setLoading] = useState(false)
-  const total = cart.reduce((sum, i) => sum + i.price * i.qty, 0)
+
+  const total = cart.reduce(
+    (sum, i) => sum + i.price * i.qty,
+    0
+  )
 
   const submitOrder = async () => {
-    if (!name || !phone) return alert('Inserisci nome e telefono')
+    if (!name || !phone) {
+      alert('Inserisci nome e telefono')
+      return
+    }
 
     setLoading(true)
 
@@ -43,45 +50,56 @@ export default function Checkout({ cart, onClose, onClear }) {
   }
 
   return (
-    <div className="checkout">
-      <h2>Il tuo ordine</h2>
+    <div className="checkout-overlay" onClick={onClose}>
+      <div
+        className="checkout-sheet"
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="sheet-handle" />
 
-      {cart.map(item => (
-        <div key={item.id} className="checkout-row">
-          <span>{item.name} × {item.qty}</span>
-          <span>€ {(item.price * item.qty).toFixed(2)}</span>
+        <h2>Il tuo ordine</h2>
+
+        {cart.map(item => (
+          <div key={item.id} className="checkout-row">
+            <span>
+              {item.name} × {item.qty}
+            </span>
+            <span>
+              € {(item.price * item.qty).toFixed(2)}
+            </span>
+          </div>
+        ))}
+
+        <div className="checkout-total">
+          Totale: € {total.toFixed(2)}
         </div>
-      ))}
 
-      <div className="checkout-total">
-        Totale: € {total.toFixed(2)}
+        <input
+          placeholder="Il tuo nome"
+          value={name}
+          onChange={e => setName(e.target.value)}
+        />
+
+        <input
+          placeholder="Telefono"
+          value={phone}
+          onChange={e => setPhone(e.target.value)}
+        />
+
+        <textarea
+          placeholder="Note (opzionale)"
+          value={note}
+          onChange={e => setNote(e.target.value)}
+        />
+
+        <button onClick={submitOrder} disabled={loading}>
+          {loading ? 'Invio…' : 'Invia ordine'}
+        </button>
+
+        <button className="link" onClick={onClose}>
+          Torna ai prodotti
+        </button>
       </div>
-
-      <input
-        placeholder="Il tuo nome"
-        value={name}
-        onChange={e => setName(e.target.value)}
-      />
-
-      <input
-        placeholder="Telefono"
-        value={phone}
-        onChange={e => setPhone(e.target.value)}
-      />
-
-      <textarea
-        placeholder="Note (opzionale)"
-        value={note}
-        onChange={e => setNote(e.target.value)}
-      />
-
-      <button onClick={submitOrder} disabled={loading}>
-        {loading ? 'Invio…' : 'Invia ordine'}
-      </button>
-
-      <button className="link" onClick={onClose}>
-        Torna ai prodotti
-      </button>
     </div>
   )
 }
