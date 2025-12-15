@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './lib/supabase'
 
-export default function Home({ onAdd }) {
+export default function Home({ onAdd, cartCount }) {
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
 
@@ -10,13 +10,13 @@ export default function Home({ onAdd }) {
   }, [])
 
   const loadProducts = async () => {
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from('products')
       .select('*')
       .eq('active', true)
       .order('id')
 
-    if (!error) setProducts(data || [])
+    setProducts(data || [])
     setLoading(false)
   }
 
@@ -45,8 +45,8 @@ export default function Home({ onAdd }) {
         </h1>
 
         <p className="hero-subtitle">
-          Ogni settimana preparo pasta fresca artigianale con ingredienti semplici e tanto amore.
-          Scegli cosa vuoi, al resto pensiamo insieme su WhatsApp.
+          Ogni settimana preparo pasta fresca artigianale con ingredienti semplici
+          e tanto amore. Scegli cosa vuoi, al resto pensiamo insieme su WhatsApp.
         </p>
 
         <p className="hero-note">
@@ -68,7 +68,7 @@ export default function Home({ onAdd }) {
               >
                 <img
                   src={product.image_url}
-                  alt={`Pasta fresca ${product.name}`}
+                  alt={product.name}
                   className="product-image"
                 />
 
@@ -91,11 +91,18 @@ export default function Home({ onAdd }) {
         </div>
       </section>
 
+      {/* CARRELLO */}
+      {cartCount > 0 && (
+        <button className="cart-button">
+          Carrello · {cartCount}
+        </button>
+      )}
+
       {/* TRUST */}
       <section className="trust">
         <p className="trust-text">
-          Nessun pagamento online.
-          Ti contatterò io su WhatsApp per confermare ritiro o consegna.
+          Nessun pagamento online. Ti contatterò io per confermare
+          ritiro o consegna.
         </p>
       </section>
 
