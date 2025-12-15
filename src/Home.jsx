@@ -25,14 +25,11 @@ export default function Home({ onAdd }) {
       {/* HEADER */}
       <header className="header">
         <div className="header-inner">
-          {/* ICONA */}
           <img
             src="/logo-icon.png"
             alt="Logo In Cucina con Glò"
             className="header-logo-icon"
           />
-
-          {/* TESTO */}
           <img
             src="/logo-text.png"
             alt="In Cucina con Glò"
@@ -61,41 +58,40 @@ export default function Home({ onAdd }) {
       <section className="products">
         {loading && <p>Caricamento…</p>}
 
-        {!loading && products.length === 0 && (
-          <p>Nessun prodotto disponibile al momento.</p>
-        )}
-
         <div className="products-grid">
-          {products.map(product => (
-            <div key={product.id} className="product-card">
-              <img
-                src={product.image_url}
-                alt={`Pasta fresca ${product.name}`}
-                className="product-image"
-              />
+          {!loading &&
+            products.map((product, index) => (
+              <div
+                key={product.id}
+                className="product-card fade-in"
+                style={{ animationDelay: `${index * 80}ms` }}
+              >
+                <img
+                  src={product.image_url}
+                  alt={`Pasta fresca ${product.name}`}
+                  className="product-image"
+                />
 
-              <div className="product-info">
-                <h3 className="product-name">
-                  {product.name}
-                </h3>
+                <div className="product-info">
+                  <h3 className="product-name">{product.name}</h3>
 
-                <p className="product-price">
-                  € {product.price.toFixed(2)}
-                </p>
+                  <p className="product-price">
+                    € {product.price.toFixed(2)}
+                  </p>
 
-                <button
-                  className="product-add"
-                  onClick={() => onAdd(product)}
-                >
-                  Aggiungi
-                </button>
+                  <button
+                    className="product-add"
+                    onClick={() => onAdd(product)}
+                  >
+                    Aggiungi
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
         </div>
       </section>
 
-      {/* TESTO DI FIDUCIA */}
+      {/* TRUST */}
       <section className="trust">
         <p className="trust-text">
           Nessun pagamento online.
@@ -103,7 +99,7 @@ export default function Home({ onAdd }) {
         </p>
       </section>
 
-      {/* CHIUSURA */}
+      {/* FOOTER */}
       <footer className="home-footer">
         <p className="footer-note">
           Sono Glò e cucino come farei per la mia famiglia.
