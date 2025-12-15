@@ -197,3 +197,125 @@ img {
   font-size: 0.85rem;
   color: var(--muted);
 }
+
+/* =========================
+   CHECKOUT / RIEPILOGO ORDINE
+   ========================= */
+
+.checkout-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 300;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+}
+
+.checkout-panel {
+  background: var(--card);
+  width: 100%;
+  max-width: 520px;
+  border-radius: 22px 22px 0 0;
+  padding: 1.2rem 1rem 1.4rem;
+}
+
+/* HEADER */
+.checkout-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.checkout-header h2 {
+  font-size: 1.1rem;
+  color: var(--gold);
+}
+
+.checkout-close {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 1.2rem;
+}
+
+/* LISTA */
+.checkout-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.checkout-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.checkout-item-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.checkout-item-name {
+  font-size: 0.95rem;
+}
+
+.checkout-item-price {
+  font-size: 0.85rem;
+  color: var(--gold);
+}
+
+/* QUANTITÀ */
+.checkout-qty {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.checkout-qty button {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid var(--gold);
+  background: transparent;
+  color: var(--gold);
+  font-weight: 700;
+}
+
+.checkout-qty span {
+  min-width: 20px;
+  text-align: center;
+}
+
+/* TOTALE */
+.checkout-total {
+  display: flex;
+  justify-content: space-between;
+  margin: 1.2rem 0 1rem;
+  font-size: 1rem;
+}
+
+.checkout-total strong {
+  color: var(--gold);
+}
+
+/* CTA */
+.checkout-confirm {
+  width: 100%;
+  padding: 0.8rem;
+  border-radius: 14px;
+  border: none;
+  background: var(--gold);
+  color: #000;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.checkout-note {
+  margin-top: 0.8rem;
+  font-size: 0.75rem;
+  color: var(--muted);
+  text-align: center;
+}
