@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import Home from './Home'
 import Checkout from './components/Checkout'
+import Admin from './components/Admin'
 
 export default function App() {
   const [cart, setCart] = useState([])
@@ -27,11 +28,15 @@ export default function App() {
     0
   )
 
+  // routing semplice senza librerie
+  if (window.location.pathname === '/admin') {
+    return <Admin />
+  }
+
   return (
     <>
       <Home onAdd={addToCart} />
 
-      {/* BOTTONE CARRELLO */}
       {cart.length > 0 && (
         <button
           className="cart-button"
@@ -41,14 +46,13 @@ export default function App() {
         </button>
       )}
 
-      {/* CHECKOUT BOTTOM SHEET */}
       {showCheckout && (
         <Checkout
-  cart={cart}
-  setCart={setCart}
-  onClose={() => setShowCheckout(false)}
-  onClear={clearCart}
-/>
+          cart={cart}
+          setCart={setCart}
+          onClose={() => setShowCheckout(false)}
+          onClear={clearCart}
+        />
       )}
     </>
   )
