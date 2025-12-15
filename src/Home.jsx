@@ -7,6 +7,11 @@ export default function Home() {
   const [cart, setCart] = useState([])
   const [showCheckout, setShowCheckout] = useState(false)
 
+  // DATI CLIENTE
+  const [customerName, setCustomerName] = useState("")
+  const [customerPhone, setCustomerPhone] = useState("")
+  const [notes, setNotes] = useState("")
+
   /* =========================
      LOAD PRODUCTS
      ========================= */
@@ -26,7 +31,7 @@ export default function Home() {
   }
 
   /* =========================
-     CART LOGIC (STABILE)
+     CART LOGIC
      ========================= */
 
   const addToCart = (product) => {
@@ -46,7 +51,7 @@ export default function Home() {
         {
           id: product.id,
           name: product.name,
-          price: Number(product.price), // ✅ FISSO
+          price: Number(product.price),
           quantity: 1,
         },
       ]
@@ -80,17 +85,23 @@ export default function Home() {
      ========================= */
 
   const handleConfirmOrder = async () => {
-    if (cart.length === 0) return
+    if (!customerName || !customerPhone) {
+      alert("Inserisci nome e numero WhatsApp")
+      return
+    }
 
     const total = cart.reduce(
       (sum, item) => sum + item.price * item.quantity,
       0
     )
 
-    // 1. Inserisco ordine
+    // 1. ORDINE (COLONNE CORRETTE)
     const { data: order, error: orderError } = await supabase
       .from("orders")
       .insert({
+        customer_name: customerName,
+        customer_phone: customerPhone,
+        note: notes,
         total,
         status: "nuovo",
       })
@@ -102,7 +113,7 @@ export default function Home() {
       return
     }
 
-    // 2. Inserisco prodotti
+    // 2. RIGHE ORDINE
     const items = cart.map(item => ({
       order_id: order.id,
       product_id: item.id,
@@ -119,11 +130,14 @@ export default function Home() {
       return
     }
 
-    // 3. Reset
+    // 3. RESET
     setCart([])
+    setCustomerName("")
+    setCustomerPhone("")
+    setNotes("")
     setShowCheckout(false)
 
-    alert("Ordine inviato correttamente! Ti contatterò a breve 😊")
+    alert("Ordine inviato! Ti contatterò a breve su WhatsApp 😊")
   }
 
   /* =========================
@@ -135,16 +149,8 @@ export default function Home() {
       {/* HEADER */}
       <header className="header">
         <div className="header-inner">
-          <img
-            src="/logo-icon.png"
-            alt="In Cucina con Glò"
-            className="header-logo-icon"
-          />
-          <img
-            src="/logo-text.png"
-            alt="In Cucina con Glò"
-            className="header-logo-text"
-          />
+          <img src="/logo-icon.png" className="header-logo-icon" />
+          <img src="/logo-text.png" className="header-logo-text" />
         </div>
       </header>
 
@@ -165,7 +171,7 @@ export default function Home() {
         </p>
       </section>
 
-      {/* PRODUCTS */}
+      {/* PRODOTTI */}
       <section className="products">
         <div className="products-grid">
           {products.map((product, i) => (
@@ -174,11 +180,7 @@ export default function Home() {
               className="product-card fade-in"
               style={{ animationDelay: `${i * 0.05}s` }}
             >
-              <img
-                src={product.image_url}
-                alt={product.name}
-                className="product-image"
-              />
+              <img src={product.image_url} className="product-image" />
 
               <div className="product-info">
                 <div className="product-name">{product.name}</div>
@@ -198,7 +200,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CART BUTTON */}
+      {/* CARRELLO */}
       {cart.length > 0 && (
         <button
           className="cart-button"
@@ -212,6 +214,12 @@ export default function Home() {
       {showCheckout && (
         <Checkout
           cart={cart}
+          customerName={customerName}
+          setCustomerName={setCustomerName}
+          customerPhone={customerPhone}
+          setCustomerPhone={setCustomerPhone}
+          notes={notes}
+          setNotes={setNotes}
           onIncrease={increaseQty}
           onDecrease={decreaseQty}
           onClose={() => setShowCheckout(false)}
