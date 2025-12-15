@@ -53,7 +53,7 @@ export default function Checkout({ cart, setCart, onClose, onClear }) {
     const items = cart.map(i => ({
       order_id: order.id,
       product_id: i.id,
-      qty: i.qty,
+      quantity: i.qty,
       price: i.price
     }))
 
