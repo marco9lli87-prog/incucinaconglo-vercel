@@ -6,6 +6,7 @@ export default function Checkout({ cart, setCart, onClose, onClear }) {
   const [phone, setPhone] = useState('')
   const [note, setNote] = useState('')
   const [loading, setLoading] = useState(false)
+  const [redirecting, setRedirecting] = useState(false)
 
   const total = cart.reduce(
     (sum, i) => sum + i.price * i.qty,
@@ -58,9 +59,41 @@ export default function Checkout({ cart, setCart, onClose, onClear }) {
 
     await supabase.from('order_items').insert(items)
 
+    const orderLines = cart
+      .map(
+        i =>
+          `• ${i.name} x${i.qty} – € ${(i.price * i.qty).toFixed(2)}`
+      )
+      .join('\n')
+
+    const message = `
+Ciao! 👋
+Ho appena inviato un ordine dal sito *In Cucina con Glò* 🍝
+
+*Nome:* ${name}
+*Telefono:* ${phone}
+
+*Ordine:*
+${orderLines}
+
+*Totale:* € ${total.toFixed(2)}
+
+${note ? `*Note:* ${note}` : ''}
+`.trim()
+
+    const whatsappNumber = '393331234567' // <-- METTI IL TUO NUMERO
+
+    const whatsappUrl =
+      `https://wa.me/${whatsappNumber}?text=` +
+      encodeURIComponent(message)
+
     onClear()
-    onClose()
-    alert('Ordine ricevuto! Ti contatteremo a breve.')
+    setRedirecting(true)
+
+    setTimeout(() => {
+      window.open(whatsappUrl, '_blank')
+      onClose()
+    }, 800)
 
     setLoading(false)
   }
@@ -73,24 +106,23 @@ export default function Checkout({ cart, setCart, onClose, onClear }) {
       >
         <div className="sheet-handle" />
 
+        {redirecting && (
+          <div className="checkout-redirect">
+            Ti stiamo aprendo WhatsApp per confermare l’ordine…
+          </div>
+        )}
+
         <h2>Riepilogo ordine</h2>
 
-        {/* RIEPILOGO */}
         <div className="checkout-summary">
           {cart.map(item => (
             <div key={item.id} className="checkout-row">
-              <span className="checkout-name">
-                {item.name}
-              </span>
+              <span>{item.name}</span>
 
               <div className="checkout-qty">
-                <button onClick={() => updateQty(item.id, -1)}>
-                  −
-                </button>
+                <button onClick={() => updateQty(item.id, -1)}>−</button>
                 <span>{item.qty}</span>
-                <button onClick={() => updateQty(item.id, 1)}>
-                  +
-                </button>
+                <button onClick={() => updateQty(item.id, 1)}>+</button>
               </div>
 
               <span className="checkout-price">
@@ -104,7 +136,6 @@ export default function Checkout({ cart, setCart, onClose, onClear }) {
           Totale: € {total.toFixed(2)}
         </div>
 
-        {/* DATI CLIENTE */}
         <div className="checkout-form">
           <input
             placeholder="Il tuo nome"
@@ -124,6 +155,12 @@ export default function Checkout({ cart, setCart, onClose, onClear }) {
             onChange={e => setNote(e.target.value)}
           />
         </div>
+
+        <p className="checkout-info">
+          Dopo l’invio verrai indirizzato su WhatsApp per confermare
+          l’ordine e accordarci su ritiro o consegna.
+          Nessun pagamento online.
+        </p>
 
         <button
           className="checkout-submit"
