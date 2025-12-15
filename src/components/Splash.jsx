@@ -5,7 +5,7 @@ export default function Splash({ onFinish }) {
     const timer = setTimeout(() => {
       localStorage.setItem('seenSplash', 'true')
       onFinish()
-    }, 2000)
+    }, 4000)
 
     return () => clearTimeout(timer)
   }, [onFinish])
