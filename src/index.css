@@ -92,9 +92,9 @@ img {
 /* FRUSTA SOPRA IL LOGO */
 .splash-frusta-overlay {
   position: absolute;
-  top: 18px;          /* regola SOLO questo se serve */
+  top: 38px;              /* ↓ più in basso */
   left: 50%;
-  width: 90px;
+  width: 120px;           /* ↑ più grande */
   transform: translateX(-50%);
   animation: frustaRotate 4s ease-in-out forwards;
   pointer-events: none;
