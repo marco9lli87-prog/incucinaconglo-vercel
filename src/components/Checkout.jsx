@@ -6,6 +6,7 @@ export default function Checkout({ cart, setCart, onClose, onClear }) {
   const [phone, setPhone] = useState('')
   const [note, setNote] = useState('')
   const [loading, setLoading] = useState(false)
+  const [success, setSuccess] = useState(false)
 
   const total = cart.reduce(
     (sum, i) => sum + i.price * i.qty,
@@ -32,52 +33,6 @@ export default function Checkout({ cart, setCart, onClose, onClear }) {
 
     setLoading(true)
 
-    /* =========================
-       MESSAGGIO WHATSAPP
-       ========================= */
-
-    const orderLines = cart
-      .map(
-        i =>
-          `• ${i.name} x${i.qty} – € ${(i.price * i.qty).toFixed(2)}`
-      )
-      .join('\n')
-
-    const message = `
-Ciao Glò! 👋  
-sono ${name} 😊
-
-Ho appena fatto un ordine dal sito *In Cucina con Glò* 🍝
-
-🧺 *Il mio ordine:*
-${orderLines}
-
-💰 *Totale:* € ${total.toFixed(2)}
-
-${note ? `📝 Note: ${note}` : ''}
-
-Quando preferisci sentirci per confermare
-ritiro o consegna?  
-Grazie! 🙏
-`.trim()
-
-    const whatsappNumber = '393477481222' // <-- METTI QUI IL TUO NUMERO
-    const whatsappUrl =
-      `https://wa.me/${whatsappNumber}?text=` +
-      encodeURIComponent(message)
-
-    /* =========================
-       APERTURA IMMEDIATA WHATSAPP
-       (iOS / Safari SAFE)
-       ========================= */
-
-    window.location.href = whatsappUrl
-
-    /* =========================
-       SALVATAGGIO ORDINE
-       IN BACKGROUND
-       ========================= */
-
     try {
       const { data: order, error } = await supabase
         .from('orders')
@@ -85,27 +40,30 @@ Grazie! 🙏
           customer_name: name,
           customer_phone: phone,
           note,
-          total
+          total,
+          status: 'nuovo'
         })
         .select()
         .single()
 
-      if (!error && order) {
-        const items = cart.map(i => ({
-          order_id: order.id,
-          product_id: i.id,
-          quantity: i.qty,
-          price: i.price
-        }))
+      if (error) throw error
 
-        await supabase.from('order_items').insert(items)
-      }
+      const items = cart.map(i => ({
+        order_id: order.id,
+        product_id: i.id,
+        quantity: i.qty,
+        price: i.price
+      }))
+
+      await supabase.from('order_items').insert(items)
+
+      setSuccess(true)
+      onClear()
     } catch (err) {
-      console.error('Errore salvataggio ordine:', err)
+      alert('Errore nell’invio dell’ordine')
+      console.error(err)
     }
 
-    onClear()
-    onClose()
     setLoading(false)
   }
 
@@ -117,71 +75,87 @@ Grazie! 🙏
       >
         <div className="sheet-handle" />
 
-        <h2>Riepilogo ordine</h2>
+        {success ? (
+          <>
+            <h2>Ordine ricevuto 💛</h2>
+            <p className="checkout-info">
+              Grazie! Abbiamo ricevuto il tuo ordine.
+              <br />
+              Ti contatteremo a breve su WhatsApp
+              per confermare ritiro o consegna.
+            </p>
 
-        <div className="checkout-summary">
-          {cart.map(item => (
-            <div key={item.id} className="checkout-row">
-              <span>{item.name}</span>
+            <button
+              className="checkout-submit"
+              onClick={onClose}
+            >
+              Torna alla home
+            </button>
+          </>
+        ) : (
+          <>
+            <h2>Riepilogo ordine</h2>
 
-              <div className="checkout-qty">
-                <button onClick={() => updateQty(item.id, -1)}>
-                  −
-                </button>
-                <span>{item.qty}</span>
-                <button onClick={() => updateQty(item.id, 1)}>
-                  +
-                </button>
-              </div>
+            <div className="checkout-summary">
+              {cart.map(item => (
+                <div key={item.id} className="checkout-row">
+                  <span>{item.name}</span>
 
-              <span className="checkout-price">
-                € {(item.price * item.qty).toFixed(2)}
-              </span>
+                  <div className="checkout-qty">
+                    <button onClick={() => updateQty(item.id, -1)}>−</button>
+                    <span>{item.qty}</span>
+                    <button onClick={() => updateQty(item.id, 1)}>+</button>
+                  </div>
+
+                  <span className="checkout-price">
+                    € {(item.price * item.qty).toFixed(2)}
+                  </span>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
 
-        <div className="checkout-total">
-          Totale: € {total.toFixed(2)}
-        </div>
+            <div className="checkout-total">
+              Totale: € {total.toFixed(2)}
+            </div>
 
-        <div className="checkout-form">
-          <input
-            placeholder="Il tuo nome"
-            value={name}
-            onChange={e => setName(e.target.value)}
-          />
+            <div className="checkout-form">
+              <input
+                placeholder="Il tuo nome"
+                value={name}
+                onChange={e => setName(e.target.value)}
+              />
 
-          <input
-            placeholder="Telefono"
-            value={phone}
-            onChange={e => setPhone(e.target.value)}
-          />
+              <input
+                placeholder="Telefono"
+                value={phone}
+                onChange={e => setPhone(e.target.value)}
+              />
 
-          <textarea
-            placeholder="Note (opzionale)"
-            value={note}
-            onChange={e => setNote(e.target.value)}
-          />
-        </div>
+              <textarea
+                placeholder="Note (opzionale)"
+                value={note}
+                onChange={e => setNote(e.target.value)}
+              />
+            </div>
 
-        <p className="checkout-info">
-          Dopo l’invio verrai indirizzato su WhatsApp per confermare
-          l’ordine e accordarci su ritiro o consegna.
-          Nessun pagamento online.
-        </p>
+            <p className="checkout-info">
+              Nessun pagamento online.
+              Riceverai conferma su WhatsApp.
+            </p>
 
-        <button
-          className="checkout-submit"
-          onClick={submitOrder}
-          disabled={loading}
-        >
-          {loading ? 'Invio…' : 'Invia ordine'}
-        </button>
+            <button
+              className="checkout-submit"
+              onClick={submitOrder}
+              disabled={loading}
+            >
+              {loading ? 'Invio…' : 'Invia ordine'}
+            </button>
 
-        <button className="checkout-cancel" onClick={onClose}>
-          Torna ai prodotti
-        </button>
+            <button className="checkout-cancel" onClick={onClose}>
+              Annulla
+            </button>
+          </>
+        )}
       </div>
     </div>
   )
