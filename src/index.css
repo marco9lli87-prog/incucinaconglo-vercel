@@ -82,7 +82,7 @@ img {
   width: 90px;
   margin: 0 auto;
   display: block;
-  animation: frustaRotate 2s ease-in-out forwards;
+  animation: frustaRotate 4s ease-in-out forwards;
   transform-origin: center center;
 }
 
