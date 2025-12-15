@@ -48,7 +48,7 @@ export default function Admin() {
     setOrders(sorted)
   }
 
-  const sendWhatsappConfirmation = order => {
+  const buildWhatsappUrl = order => {
     const items = order.order_items
       .map(i => `• ${i.products?.name} x${i.quantity}`)
       .join('\n')
@@ -68,30 +68,46 @@ ritiro o consegna?
 A presto 💛
 `.trim()
 
-    window.open(
-      `https://wa.me/39${order.customer_phone}?text=${encodeURIComponent(message)}`,
-      '_blank'
+    return (
+      `https://wa.me/39${order.customer_phone}?text=` +
+      encodeURIComponent(message)
     )
   }
 
-  const updateStatus = async (order, newStatus) => {
+  const markAsGestito = async order => {
+    // ✅ APERTURA IMMEDIATA (iOS SAFE)
+    window.location.href = buildWhatsappUrl(order)
+
     setUpdatingId(order.id)
 
+    // ⬇️ UPDATE IN BACKGROUND
     await supabase
       .from('orders')
-      .update({ status: newStatus })
+      .update({ status: 'gestito' })
       .eq('id', order.id)
 
     setOrders(prev =>
       prev.map(o =>
-        o.id === order.id ? { ...o, status: newStatus } : o
+        o.id === order.id ? { ...o, status: 'gestito' } : o
       )
     )
 
-    // WhatsApp automatico SOLO quando diventa "gestito"
-    if (order.status === 'nuovo' && newStatus === 'gestito') {
-      sendWhatsappConfirmation(order)
-    }
+    setUpdatingId(null)
+  }
+
+  const markAsCompleto = async order => {
+    setUpdatingId(order.id)
+
+    await supabase
+      .from('orders')
+      .update({ status: 'consegnato' })
+      .eq('id', order.id)
+
+    setOrders(prev =>
+      prev.map(o =>
+        o.id === order.id ? { ...o, status: 'consegnato' } : o
+      )
+    )
 
     setUpdatingId(null)
   }
@@ -105,13 +121,7 @@ A presto 💛
   return (
     <div style={{ padding: '1.25rem', maxWidth: 600, margin: '0 auto' }}>
       {/* HEADER */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          marginBottom: '0.5rem'
-        }}
-      >
+      <div style={{ display: 'flex', alignItems: 'center' }}>
         <h1 style={{ color: '#d4af37', marginRight: 8 }}>
           Ordini
         </h1>
@@ -186,7 +196,7 @@ A presto 💛
             {order.status === 'nuovo' && (
               <button
                 disabled={updatingId === order.id}
-                onClick={() => updateStatus(order, 'gestito')}
+                onClick={() => markAsGestito(order)}
                 style={{
                   marginRight: 6,
                   background: '#4caf50',
@@ -206,7 +216,7 @@ A presto 💛
             {order.status !== 'consegnato' && (
               <button
                 disabled={updatingId === order.id}
-                onClick={() => updateStatus(order, 'consegnato')}
+                onClick={() => markAsCompleto(order)}
                 style={{
                   background: '#2196f3',
                   color: '#fff',
