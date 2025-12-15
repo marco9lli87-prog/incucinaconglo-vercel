@@ -6,84 +6,91 @@ export default function Home({ onAdd }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const loadProducts = async () => {
-      const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .eq('active', true)
-        .order('name')
-
-      if (!error) {
-        setProducts(data || [])
-      }
-
-      setLoading(false)
-    }
-
     loadProducts()
   }, [])
 
+  const loadProducts = async () => {
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .eq('active', true)
+      .order('id')
+
+    if (!error) setProducts(data || [])
+    setLoading(false)
+  }
+
   return (
-    <>
-      {/* HEADER */}
-      <header className="site-header">
-  <div className="header-inner">
-    <div className="logo-split">
-      <img
-        src="/logo-icon.png"
-        alt=""
-        className="logo-icon"
-      />
-      <span className="logo-text">
-        IN CUCINA CON GLÒ
-      </span>
-    </div>
-  </div>
-</header>
-
+    <main className="home">
       {/* HERO */}
-    <section className="hero">
-  <h1>
-    Pasta fresca<br />
-    come una volta
-  </h1>
+      <section className="hero">
+        <h1 className="hero-title">
+          Pasta fresca fatta a mano, come a casa
+        </h1>
 
-  <p>
-    Tirata a mano ogni giorno,<br />
-    con ingredienti semplici e di qualità.
-  </p>
+        <p className="hero-subtitle">
+          Ogni settimana preparo pasta fresca artigianale con ingredienti semplici e tanto amore.
+          Scegli cosa vuoi, al resto pensiamo insieme su WhatsApp.
+        </p>
 
-  <span className="hero-sub">
-    Ordina online · Ritiro o consegna concordata
-  </span>
-</section>
+        <p className="hero-note">
+          Produzione limitata • disponibilità settimanale
+        </p>
+      </section>
 
       {/* PRODOTTI */}
       <section className="products">
-        {loading && (
-          <p className="loading">Sto preparando il banco…</p>
+        {loading && <p>Caricamento…</p>}
+
+        {!loading && products.length === 0 && (
+          <p>Nessun prodotto disponibile al momento.</p>
         )}
 
-        {!loading &&
-          products.map(product => (
+        <div className="products-grid">
+          {products.map(product => (
             <div key={product.id} className="product-card">
               <img
                 src={product.image_url}
-                alt={product.name}
+                alt={`Pasta fresca ${product.name}`}
+                className="product-image"
               />
 
-              <h3>{product.name}</h3>
+              <div className="product-info">
+                <h3 className="product-name">
+                  {product.name}
+                </h3>
 
-              <span className="price">
-                € {product.price.toFixed(2)}
-              </span>
+                <p className="product-price">
+                  € {product.price.toFixed(2)}
+                </p>
 
-              <button onClick={() => onAdd(product)}>
-                Aggiungi al carrello
-              </button>
+                <button
+                  className="product-add"
+                  onClick={() => onAdd(product)}
+                >
+                  Aggiungi
+                </button>
+              </div>
             </div>
           ))}
+        </div>
       </section>
-    </>
+
+      {/* TESTO DI FIDUCIA */}
+      <section className="trust">
+        <p className="trust-text">
+          Nessun pagamento online.
+          Ti contatterò io su WhatsApp per confermare ritiro o consegna.
+        </p>
+      </section>
+
+      {/* CHIUSURA */}
+      <footer className="home-footer">
+        <p className="footer-note">
+          Sono Glò e cucino come farei per la mia famiglia.
+          Pochi piatti, fatti bene, quando è il momento giusto.
+        </p>
+      </footer>
+    </main>
   )
 }
