@@ -25,22 +25,19 @@ export default function Home({ onAdd }) {
       {/* HEADER */}
       <header className="header">
         <div className="header-inner">
-          {/* LOGO / SIMBOLO */}
+          {/* ICONA */}
           <img
-            src="/logo.png"
-            alt="In Cucina con Glò"
-            className="header-logo"
+            src="/logo.icon.png"
+            alt="Logo In Cucina con Glò"
+            className="header-logo-icon"
           />
 
           {/* TESTO */}
-          <div className="header-text">
-            <span className="header-title">
-              In Cucina con Glò
-            </span>
-            <span className="header-subtitle">
-              Pasta fresca artigianale
-            </span>
-          </div>
+          <img
+            src="/logo.text.png"
+            alt="In Cucina con Glò"
+            className="header-logo-text"
+          />
         </div>
       </header>
 
