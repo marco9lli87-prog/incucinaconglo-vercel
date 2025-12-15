@@ -44,10 +44,11 @@ export default function App() {
       {/* CHECKOUT BOTTOM SHEET */}
       {showCheckout && (
         <Checkout
-          cart={cart}
-          onClose={() => setShowCheckout(false)}
-          onClear={clearCart}
-        />
+  cart={cart}
+  setCart={setCart}
+  onClose={() => setShowCheckout(false)}
+  onClear={clearCart}
+/>
       )}
     </>
   )
