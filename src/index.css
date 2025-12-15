@@ -96,56 +96,74 @@ img {
 
 /* PRODOTTI */
 .products {
-  padding: 1.5rem 1rem 6.5rem;
+  padding: 2rem 1.25rem 7rem;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
+  gap: 1.25rem;
 }
 
+/* CARD */
 .product-card {
-  background: var(--card);
-  border-radius: 16px;
-  padding: 0.85rem;
+  background: linear-gradient(
+    180deg,
+    #1b1b1b,
+    #151515
+  );
+  border-radius: 18px;
+  padding: 0.9rem;
   text-align: center;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
 .product-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+  transform: translateY(-4px);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.45);
 }
 
+/* IMMAGINE */
 .product-card img {
-  border-radius: 12px;
-  margin-bottom: 0.6rem;
+  border-radius: 14px;
+  margin-bottom: 0.7rem;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
 }
 
+/* NOME */
 .product-card h3 {
   font-size: 0.95rem;
+  font-weight: 500;
   margin-bottom: 0.3rem;
 }
 
+/* PREZZO */
 .product-card .price {
   color: var(--gold);
   font-weight: 600;
+  font-size: 0.95rem;
+  margin-bottom: 0.7rem;
   display: block;
-  margin-bottom: 0.6rem;
 }
 
+/* CTA */
 .product-card button {
   background: transparent;
   border: 1px solid var(--gold);
   color: var(--gold);
-  padding: 0.5rem;
+  padding: 0.55rem;
   width: 100%;
-  border-radius: 10px;
+  border-radius: 12px;
   font-size: 0.85rem;
-  transition: background 0.2s ease, color 0.2s ease;
+  letter-spacing: 0.05em;
+  transition: background 0.25s ease, color 0.25s ease, transform 0.1s ease;
 }
 
 .product-card button:hover {
   background: var(--gold);
   color: #000;
+}
+
+.product-card button:active {
+  transform: scale(0.96);
 }
 
 /* LOADING */
