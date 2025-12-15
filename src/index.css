@@ -24,44 +24,7 @@ img {
   display: block;
 }
 
-/* =========================
-   HEADER
-   ========================= */
 
-.site-header {
-  position: sticky;
-  top: 0;
-  z-index: 20;
-  background: rgba(15, 15, 15, 0.92);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.header-inner {
-  max-width: 480px;
-  margin: 0 auto;
-  padding: 1.1rem 1.25rem;
-  display: flex;
-  align-items: center;
-}
-
-.logo-split {
-  display: flex;
-  align-items: center;
-  gap: 0.65rem;
-}
-
-.logo-icon {
-  height: 34px;
-}
-
-.logo-text {
-  font-family: 'Cinzel', serif;
-  font-size: 0.9rem;
-  letter-spacing: 0.18em;
-  color: var(--gold);
-  white-space: nowrap;
-}
 
 /* =========================
    HERO
