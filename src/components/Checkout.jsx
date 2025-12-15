@@ -61,7 +61,7 @@ ritiro o consegna?
 Grazie! 🙏
 `.trim()
 
-    const whatsappNumber = '393331234567' // <-- METTI QUI IL TUO NUMERO
+    const whatsappNumber = '393477481222' // <-- METTI QUI IL TUO NUMERO
     const whatsappUrl =
       `https://wa.me/${whatsappNumber}?text=` +
       encodeURIComponent(message)
