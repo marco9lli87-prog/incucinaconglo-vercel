@@ -42,17 +42,21 @@ export default function Home({ onAdd }) {
 </header>
 
       {/* HERO */}
-      <section className="hero">
-        <h1>
-          Pasta fresca<br />
-          fatta come a casa
-        </h1>
+    <section className="hero">
+  <h1>
+    Pasta fresca<br />
+    come una volta
+  </h1>
 
-        <p>
-          Preparata a mano, con ingredienti semplici.<br />
-          Ordina oggi e scegli se ritirare o ricevere a casa.
-        </p>
-      </section>
+  <p>
+    Tirata a mano ogni giorno,<br />
+    con ingredienti semplici e di qualità.
+  </p>
+
+  <span className="hero-sub">
+    Ordina online · Ritiro o consegna concordata
+  </span>
+</section>
 
       {/* PRODOTTI */}
       <section className="products">
