@@ -77,41 +77,8 @@ img {
   display: block;
 }
 
-/* SPLASH LOGO WRAPPER */
-.splash-logo-wrapper {
-  position: relative;
-  width: 260px;
-}
-
-/* LOGO COMPLETO */
+/* SPLASH LOGO STATICO */
 .splash-logo {
-  width: 100%;
+  width: 260px;
   display: block;
-}
-
-/* FRUSTA SOPRA IL LOGO */
-.splash-frusta-overlay {
-  position: absolute;
-  top: 38px;              /* ↓ più in basso */
-  left: 50%;
-  width: 120px;           /* ↑ più grande */
-  transform: translateX(-50%);
-  animation: frustaRotate 4s ease-in-out forwards;
-  pointer-events: none;
-}
-
-/* ANIMAZIONE FRUSTA */
-@keyframes frustaRotate {
-  0% {
-    transform: translateX(-50%) rotate(0deg);
-  }
-  30% {
-    transform: translateX(-50%) rotate(-10deg);
-  }
-  60% {
-    transform: translateX(-50%) rotate(10deg);
-  }
-  100% {
-    transform: translateX(-50%) rotate(0deg);
-  }
 }
