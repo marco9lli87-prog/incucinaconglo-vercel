@@ -29,7 +29,8 @@ img {
   position: sticky;
   top: 0;
   z-index: 10;
-  background: var(--bg);
+  background: rgba(15, 15, 15, 0.95);
+  backdrop-filter: blur(6px);
   border-bottom: 1px solid #222;
   padding: 0.75rem 1rem;
   display: flex;
@@ -42,14 +43,14 @@ img {
 
 /* HERO */
 .hero {
-  padding: 3rem 1.25rem 2rem;
+  padding: 3.5rem 1.25rem 2.5rem;
   text-align: center;
 }
 
 .hero h1 {
   font-family: 'Cinzel', serif;
-  font-size: 2rem;
-  line-height: 1.2;
+  font-size: 2.1rem;
+  line-height: 1.15;
   color: var(--gold);
   margin-bottom: 1rem;
 }
@@ -57,12 +58,12 @@ img {
 .hero p {
   color: var(--muted);
   font-size: 1rem;
-  line-height: 1.4;
+  line-height: 1.5;
 }
 
 /* PRODOTTI */
 .products {
-  padding: 1.5rem 1rem 6rem;
+  padding: 1.5rem 1rem 6.5rem;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 1rem;
@@ -70,36 +71,48 @@ img {
 
 .product-card {
   background: var(--card);
-  border-radius: 14px;
-  padding: 0.75rem;
+  border-radius: 16px;
+  padding: 0.85rem;
   text-align: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.product-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
 }
 
 .product-card img {
-  border-radius: 10px;
-  margin-bottom: 0.5rem;
+  border-radius: 12px;
+  margin-bottom: 0.6rem;
 }
 
 .product-card h3 {
-  font-size: 0.9rem;
-  margin-bottom: 0.25rem;
+  font-size: 0.95rem;
+  margin-bottom: 0.3rem;
 }
 
 .product-card .price {
   color: var(--gold);
   font-weight: 600;
   display: block;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.6rem;
 }
 
 .product-card button {
   background: transparent;
   border: 1px solid var(--gold);
   color: var(--gold);
-  padding: 0.45rem;
+  padding: 0.5rem;
   width: 100%;
-  border-radius: 8px;
+  border-radius: 10px;
   font-size: 0.85rem;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.product-card button:hover {
+  background: var(--gold);
+  color: #000;
 }
 
 /* LOADING */
@@ -107,4 +120,5 @@ img {
   grid-column: 1 / -1;
   text-align: center;
   color: var(--muted);
+  padding: 2rem 0;
 }
