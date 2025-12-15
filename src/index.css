@@ -68,22 +68,30 @@ img {
 
 /* HERO */
 .hero {
-  padding: 3.5rem 1.25rem 2.5rem;
+  padding: 3.5rem 1.5rem 2.5rem;
   text-align: center;
 }
 
 .hero h1 {
   font-family: 'Cinzel', serif;
-  font-size: 2.1rem;
+  font-size: 2.2rem;
   line-height: 1.15;
   color: var(--gold);
-  margin-bottom: 1rem;
+  margin-bottom: 1.1rem;
 }
 
 .hero p {
   color: var(--muted);
-  font-size: 1rem;
-  line-height: 1.5;
+  font-size: 1.05rem;
+  line-height: 1.55;
+  margin-bottom: 0.75rem;
+}
+
+.hero-sub {
+  display: block;
+  font-size: 0.85rem;
+  color: #777;
+  letter-spacing: 0.08em;
 }
 
 /* PRODOTTI */
