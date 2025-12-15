@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
 
-export default function Checkout({ cart, onClose, onClear }) {
+export default function Checkout({ cart, setCart, onClose, onClear }) {
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
   const [note, setNote] = useState('')
@@ -11,6 +11,18 @@ export default function Checkout({ cart, onClose, onClear }) {
     (sum, i) => sum + i.price * i.qty,
     0
   )
+
+  const updateQty = (id, delta) => {
+    setCart(prev =>
+      prev
+        .map(item =>
+          item.id === id
+            ? { ...item, qty: item.qty + delta }
+            : item
+        )
+        .filter(item => item.qty > 0)
+    )
+  }
 
   const submitOrder = async () => {
     if (!name || !phone) {
@@ -67,10 +79,21 @@ export default function Checkout({ cart, onClose, onClear }) {
         <div className="checkout-summary">
           {cart.map(item => (
             <div key={item.id} className="checkout-row">
-              <span>
-                {item.name} × {item.qty}
+              <span className="checkout-name">
+                {item.name}
               </span>
-              <span>
+
+              <div className="checkout-qty">
+                <button onClick={() => updateQty(item.id, -1)}>
+                  −
+                </button>
+                <span>{item.qty}</span>
+                <button onClick={() => updateQty(item.id, 1)}>
+                  +
+                </button>
+              </div>
+
+              <span className="checkout-price">
                 € {(item.price * item.qty).toFixed(2)}
               </span>
             </div>
