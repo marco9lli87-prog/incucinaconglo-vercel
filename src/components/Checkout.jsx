@@ -5,10 +5,10 @@ export default function Checkout({
   onClose,
   onConfirm,
 }) {
-  const total = cart.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  )
+  const total = cart.reduce((sum, item) => {
+    const price = Number(item.price)
+    return sum + price * item.quantity
+  }, 0)
 
   return (
     <div className="checkout-overlay">
@@ -23,24 +23,29 @@ export default function Checkout({
 
         {/* LISTA */}
         <div className="checkout-list">
-          {cart.map(item => (
-            <div key={item.id} className="checkout-item">
-              <div className="checkout-item-info">
-                <span className="checkout-item-name">
-                  {item.name}
-                </span>
-                <span className="checkout-item-price">
-                  € {(item.price * item.quantity).toFixed(2)}
-                </span>
-              </div>
+          {cart.map(item => {
+            const price = Number(item.price)
+            const subtotal = price * item.quantity
 
-              <div className="checkout-qty">
-                <button onClick={() => onDecrease(item.id)}>-</button>
-                <span>{item.quantity}</span>
-                <button onClick={() => onIncrease(item.id)}>+</button>
+            return (
+              <div key={item.id} className="checkout-item">
+                <div className="checkout-item-info">
+                  <span className="checkout-item-name">
+                    {item.name}
+                  </span>
+                  <span className="checkout-item-price">
+                    € {subtotal.toFixed(2)}
+                  </span>
+                </div>
+
+                <div className="checkout-qty">
+                  <button onClick={() => onDecrease(item.id)}>−</button>
+                  <span>{item.quantity}</span>
+                  <button onClick={() => onIncrease(item.id)}>+</button>
+                </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
 
         {/* TOTALE */}
@@ -49,7 +54,7 @@ export default function Checkout({
           <strong>€ {total.toFixed(2)}</strong>
         </div>
 
-        {/* AZIONE */}
+        {/* CTA */}
         <button
           className="checkout-confirm"
           onClick={onConfirm}
