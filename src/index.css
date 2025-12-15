@@ -77,25 +77,26 @@ img {
   display: block;
 }
 
-/* SPLASH */
-.splash-logo {
-  width: 180px;
-  animation: spoonRotate 2s ease-in-out;
+/* SPLASH – FRUSTA */
+.splash-frusta {
+  width: 90px;
+  margin: 0 auto;
+  display: block;
+  animation: frustaRotate 2s ease-in-out forwards;
+  transform-origin: center center;
 }
 
-/* movimento delicato */
-@keyframes spoonRotate {
+@keyframes frustaRotate {
   0% {
     transform: rotate(0deg);
   }
   30% {
-    transform: rotate(-3deg);
+    transform: rotate(-12deg);
   }
   60% {
-    transform: rotate(3deg);
+    transform: rotate(12deg);
   }
   100% {
     transform: rotate(0deg);
   }
 }
-
