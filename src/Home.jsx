@@ -27,14 +27,14 @@ export default function Home({ onAdd }) {
         <div className="header-inner">
           {/* ICONA */}
           <img
-            src="/logo.icon.png"
+            src="/logo-icon.png"
             alt="Logo In Cucina con Glò"
             className="header-logo-icon"
           />
 
           {/* TESTO */}
           <img
-            src="/logo.text.png"
+            src="/logo-text.png"
             alt="In Cucina con Glò"
             className="header-logo-text"
           />
