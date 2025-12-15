@@ -67,21 +67,24 @@ export default function Checkout({ cart, setCart, onClose, onClear }) {
       .join('\n')
 
     const message = `
-Ciao! 👋
-Ho appena inviato un ordine dal sito *In Cucina con Glò* 🍝
+Ciao Glò! 👋  
+sono ${name} 😊
 
-*Nome:* ${name}
-*Telefono:* ${phone}
+Ho appena fatto un ordine dal sito *In Cucina con Glò* 🍝
 
-*Ordine:*
+🧺 *Il mio ordine:*
 ${orderLines}
 
-*Totale:* € ${total.toFixed(2)}
+💰 *Totale:* € ${total.toFixed(2)}
 
-${note ? `*Note:* ${note}` : ''}
+${note ? `📝 Note: ${note}` : ''}
+
+Quando preferisci sentirci per confermare
+ritiro o consegna?  
+Grazie! 🙏
 `.trim()
 
-    const whatsappNumber = '393331234567' // <-- METTI IL TUO NUMERO
+    const whatsappNumber = '393477481222' // <-- METTI IL TUO NUMERO
 
     const whatsappUrl =
       `https://wa.me/${whatsappNumber}?text=` +
