@@ -264,3 +264,18 @@ img {
     transform: translateY(0);
   }
 }
+
+/* BOTTONE CARRELLO */
+.cart-button {
+  position: fixed;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--gold);
+  color: #000;
+  border: none;
+  padding: 0.9rem 1.5rem;
+  border-radius: 999px;
+  font-weight: 600;
+  z-index: 40;
+}
