@@ -1,11 +1,15 @@
 import { useEffect, useState } from "react"
-import Checkout from "./components/Checkout"
 import { supabase } from "./lib/supabase"
+import Checkout from "./components/Checkout"
 
 export default function Home() {
   const [products, setProducts] = useState([])
   const [cart, setCart] = useState([])
   const [showCheckout, setShowCheckout] = useState(false)
+
+  /* =========================
+     LOAD PRODUCTS
+     ========================= */
 
   useEffect(() => {
     fetchProducts()
@@ -22,7 +26,7 @@ export default function Home() {
   }
 
   /* =========================
-     CARRELLO — FIX DEFINITIVO
+     CART LOGIC (STABILE)
      ========================= */
 
   const addToCart = (product) => {
@@ -42,7 +46,7 @@ export default function Home() {
         {
           id: product.id,
           name: product.name,
-          price: Number(product.price), // 👈 QUI ERA IL PROBLEMA
+          price: Number(product.price), // ✅ FISSO
           quantity: 1,
         },
       ]
@@ -71,7 +75,60 @@ export default function Home() {
     )
   }
 
-  /* ========================= */
+  /* =========================
+     CONFIRM ORDER
+     ========================= */
+
+  const handleConfirmOrder = async () => {
+    if (cart.length === 0) return
+
+    const total = cart.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0
+    )
+
+    // 1. Inserisco ordine
+    const { data: order, error: orderError } = await supabase
+      .from("orders")
+      .insert({
+        total,
+        status: "nuovo",
+      })
+      .select()
+      .single()
+
+    if (orderError) {
+      alert("Errore nell’invio dell’ordine")
+      return
+    }
+
+    // 2. Inserisco prodotti
+    const items = cart.map(item => ({
+      order_id: order.id,
+      product_id: item.id,
+      quantity: item.quantity,
+      price: item.price,
+    }))
+
+    const { error: itemsError } = await supabase
+      .from("order_items")
+      .insert(items)
+
+    if (itemsError) {
+      alert("Errore nel salvataggio dei prodotti")
+      return
+    }
+
+    // 3. Reset
+    setCart([])
+    setShowCheckout(false)
+
+    alert("Ordine inviato correttamente! Ti contatterò a breve 😊")
+  }
+
+  /* =========================
+     RENDER
+     ========================= */
 
   return (
     <div className="home">
@@ -108,13 +165,13 @@ export default function Home() {
         </p>
       </section>
 
-      {/* PRODOTTI */}
+      {/* PRODUCTS */}
       <section className="products">
         <div className="products-grid">
           {products.map((product, i) => (
             <div
               key={product.id}
-              className={`product-card fade-in`}
+              className="product-card fade-in"
               style={{ animationDelay: `${i * 0.05}s` }}
             >
               <img
@@ -141,7 +198,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CARRELLO */}
+      {/* CART BUTTON */}
       {cart.length > 0 && (
         <button
           className="cart-button"
@@ -158,7 +215,7 @@ export default function Home() {
           onIncrease={increaseQty}
           onDecrease={decreaseQty}
           onClose={() => setShowCheckout(false)}
-          onConfirm={() => {}}
+          onConfirm={handleConfirmOrder}
         />
       )}
     </div>
