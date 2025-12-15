@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&display=swap');
+
 :root {
   --bg: #0f0f0f;
   --card: #1a1a1a;
@@ -18,67 +20,91 @@ body {
 }
 
 img {
-  display: block;
   max-width: 100%;
+  display: block;
 }
 
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&display=swap');
+/* HEADER */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--bg);
+  border-bottom: 1px solid #222;
+  padding: 0.75rem 1rem;
+  display: flex;
+  justify-content: center;
+}
 
+.site-header img {
+  height: 40px;
+}
+
+/* HERO */
 .hero {
+  padding: 3rem 1.25rem 2rem;
   text-align: center;
-  margin-bottom: 2.5rem;
 }
 
 .hero h1 {
   font-family: 'Cinzel', serif;
+  font-size: 2rem;
+  line-height: 1.2;
   color: var(--gold);
-  font-size: 2.4rem;
-  letter-spacing: 0.05em;
   margin-bottom: 1rem;
 }
 
 .hero p {
-  color: #ccc;
+  color: var(--muted);
   font-size: 1rem;
-  line-height: 1.5;
+  line-height: 1.4;
 }
 
-/* IMAGE LOADING */
-.image-wrapper {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  overflow: hidden;
-  background: #1a1a1a;
+/* PRODOTTI */
+.products {
+  padding: 1.5rem 1rem 6rem;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
 }
 
-.image-skeleton {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    90deg,
-    #1a1a1a 25%,
-    #222 37%,
-    #1a1a1a 63%
-  );
-  background-size: 400% 100%;
-  animation: shimmer 1.4s ease infinite;
+.product-card {
+  background: var(--card);
+  border-radius: 14px;
+  padding: 0.75rem;
+  text-align: center;
 }
 
-@keyframes shimmer {
-  0% { background-position: 100% 0 }
-  100% { background-position: -100% 0 }
+.product-card img {
+  border-radius: 10px;
+  margin-bottom: 0.5rem;
 }
 
-.product-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+.product-card h3 {
+  font-size: 0.9rem;
+  margin-bottom: 0.25rem;
+}
+
+.product-card .price {
+  color: var(--gold);
+  font-weight: 600;
   display: block;
+  margin-bottom: 0.5rem;
 }
 
-/* SPLASH LOGO STATICO */
-.splash-logo {
-  width: 260px;
-  display: block;
+.product-card button {
+  background: transparent;
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  padding: 0.45rem;
+  width: 100%;
+  border-radius: 8px;
+  font-size: 0.85rem;
+}
+
+/* LOADING */
+.loading {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: var(--muted);
 }
