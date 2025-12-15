@@ -23,7 +23,8 @@ export default function Splash({ onFinish }) {
         zIndex: 9999
       }}
     >
-      <div style={{ textAlign: 'center' }}>
+      {/* LOGO WRAPPER */}
+      <div className="splash-logo-wrapper">
         {/* FRUSTA */}
         <img
           src="/frusta.png"
@@ -31,16 +32,8 @@ export default function Splash({ onFinish }) {
           className="splash-frusta"
         />
 
-        {/* TESTO */}
-        <h1
-          style={{
-            marginTop: '1.25rem',
-            color: '#d4af37',
-            fontFamily: 'Cinzel, serif',
-            letterSpacing: '0.15em',
-            fontSize: '1.1rem'
-          }}
-        >
+        {/* TESTO LOGO */}
+        <h1 className="splash-logo-text">
           IN CUCINA CON GLÒ
         </h1>
       </div>
