@@ -6,7 +6,6 @@ export default function Checkout({ cart, setCart, onClose, onClear }) {
   const [phone, setPhone] = useState('')
   const [note, setNote] = useState('')
   const [loading, setLoading] = useState(false)
-  const [redirecting, setRedirecting] = useState(false)
 
   const total = cart.reduce(
     (sum, i) => sum + i.price * i.qty,
@@ -33,31 +32,9 @@ export default function Checkout({ cart, setCart, onClose, onClear }) {
 
     setLoading(true)
 
-    const { data: order, error } = await supabase
-      .from('orders')
-      .insert({
-        customer_name: name,
-        customer_phone: phone,
-        note,
-        total
-      })
-      .select()
-      .single()
-
-    if (error) {
-      alert('Errore nell’invio dell’ordine')
-      setLoading(false)
-      return
-    }
-
-    const items = cart.map(i => ({
-      order_id: order.id,
-      product_id: i.id,
-      quantity: i.qty,
-      price: i.price
-    }))
-
-    await supabase.from('order_items').insert(items)
+    /* =========================
+       MESSAGGIO WHATSAPP
+       ========================= */
 
     const orderLines = cart
       .map(
@@ -84,20 +61,51 @@ ritiro o consegna?
 Grazie! 🙏
 `.trim()
 
-    const whatsappNumber = '393477481222' // <-- METTI IL TUO NUMERO
-
+    const whatsappNumber = '393331234567' // <-- METTI QUI IL TUO NUMERO
     const whatsappUrl =
       `https://wa.me/${whatsappNumber}?text=` +
       encodeURIComponent(message)
 
+    /* =========================
+       APERTURA IMMEDIATA WHATSAPP
+       (iOS / Safari SAFE)
+       ========================= */
+
+    window.location.href = whatsappUrl
+
+    /* =========================
+       SALVATAGGIO ORDINE
+       IN BACKGROUND
+       ========================= */
+
+    try {
+      const { data: order, error } = await supabase
+        .from('orders')
+        .insert({
+          customer_name: name,
+          customer_phone: phone,
+          note,
+          total
+        })
+        .select()
+        .single()
+
+      if (!error && order) {
+        const items = cart.map(i => ({
+          order_id: order.id,
+          product_id: i.id,
+          quantity: i.qty,
+          price: i.price
+        }))
+
+        await supabase.from('order_items').insert(items)
+      }
+    } catch (err) {
+      console.error('Errore salvataggio ordine:', err)
+    }
+
     onClear()
-    setRedirecting(true)
-
-    setTimeout(() => {
-      window.open(whatsappUrl, '_blank')
-      onClose()
-    }, 800)
-
+    onClose()
     setLoading(false)
   }
 
@@ -109,12 +117,6 @@ Grazie! 🙏
       >
         <div className="sheet-handle" />
 
-        {redirecting && (
-          <div className="checkout-redirect">
-            Ti stiamo aprendo WhatsApp per confermare l’ordine…
-          </div>
-        )}
-
         <h2>Riepilogo ordine</h2>
 
         <div className="checkout-summary">
@@ -123,9 +125,13 @@ Grazie! 🙏
               <span>{item.name}</span>
 
               <div className="checkout-qty">
-                <button onClick={() => updateQty(item.id, -1)}>−</button>
+                <button onClick={() => updateQty(item.id, -1)}>
+                  −
+                </button>
                 <span>{item.qty}</span>
-                <button onClick={() => updateQty(item.id, 1)}>+</button>
+                <button onClick={() => updateQty(item.id, 1)}>
+                  +
+                </button>
               </div>
 
               <span className="checkout-price">
