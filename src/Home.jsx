@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { supabase } from './supabaseClient'
+import { supabase } from './lib/supabase'
 
 export default function Home({ onAdd }) {
   const [products, setProducts] = useState([])
@@ -13,7 +13,10 @@ export default function Home({ onAdd }) {
         .eq('active', true)
         .order('name')
 
-      if (!error) setProducts(data || [])
+      if (!error) {
+        setProducts(data || [])
+      }
+
       setLoading(false)
     }
 
@@ -42,7 +45,9 @@ export default function Home({ onAdd }) {
 
       {/* PRODOTTI */}
       <section className="products">
-        {loading && <p className="loading">Sto preparando il banco…</p>}
+        {loading && (
+          <p className="loading">Sto preparando il banco…</p>
+        )}
 
         {!loading &&
           products.map(product => (
