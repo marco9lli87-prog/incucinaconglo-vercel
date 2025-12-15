@@ -1,6 +1,12 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 
+const STATUS_COLORS = {
+  nuovo: '#d4af37',
+  gestito: '#4caf50',
+  consegnato: '#2196f3'
+}
+
 export default function Admin() {
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
@@ -10,7 +16,7 @@ export default function Admin() {
   }, [])
 
   const loadOrders = async () => {
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from('orders')
       .select(`
         id,
@@ -19,6 +25,7 @@ export default function Admin() {
         customer_phone,
         total,
         note,
+        status,
         order_items (
           quantity,
           price,
@@ -27,8 +34,21 @@ export default function Admin() {
       `)
       .order('created_at', { ascending: false })
 
-    if (!error) setOrders(data || [])
+    setOrders(data || [])
     setLoading(false)
+  }
+
+  const updateStatus = async (orderId, newStatus) => {
+    await supabase
+      .from('orders')
+      .update({ status: newStatus })
+      .eq('id', orderId)
+
+    setOrders(prev =>
+      prev.map(o =>
+        o.id === orderId ? { ...o, status: newStatus } : o
+      )
+    )
   }
 
   return (
@@ -39,10 +59,6 @@ export default function Admin() {
 
       {loading && <p>Caricamento…</p>}
 
-      {!loading && orders.length === 0 && (
-        <p>Nessun ordine ancora.</p>
-      )}
-
       {orders.map(order => (
         <div
           key={order.id}
@@ -50,10 +66,23 @@ export default function Admin() {
             background: '#1a1a1a',
             borderRadius: 14,
             padding: '1rem',
-            marginBottom: '1rem'
+            marginBottom: '1rem',
+            borderLeft: `4px solid ${STATUS_COLORS[order.status]}`
           }}
         >
-          <strong>{order.customer_name}</strong><br />
+          <strong>{order.customer_name}</strong>{' '}
+          <span
+            style={{
+              fontSize: '0.75rem',
+              color: STATUS_COLORS[order.status],
+              marginLeft: 6
+            }}
+          >
+            ● {order.status}
+          </span>
+
+          <br />
+
           <a
             href={`https://wa.me/39${order.customer_phone}`}
             target="_blank"
@@ -63,7 +92,7 @@ export default function Admin() {
             {order.customer_phone}
           </a>
 
-          <p style={{ fontSize: '0.8rem', color: '#999' }}>
+          <p style={{ fontSize: '0.75rem', color: '#999' }}>
             {new Date(order.created_at).toLocaleString()}
           </p>
 
@@ -84,6 +113,26 @@ export default function Admin() {
               Note: {order.note}
             </p>
           )}
+
+          {/* AZIONI */}
+          <div style={{ marginTop: '0.75rem' }}>
+            {order.status !== 'gestito' && (
+              <button
+                onClick={() => updateStatus(order.id, 'gestito')}
+                style={{ marginRight: 8 }}
+              >
+                Segna come gestito
+              </button>
+            )}
+
+            {order.status !== 'consegnato' && (
+              <button
+                onClick={() => updateStatus(order.id, 'consegnato')}
+              >
+                Segna come consegnato
+              </button>
+            )}
+          </div>
         </div>
       ))}
     </div>
