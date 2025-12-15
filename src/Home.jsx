@@ -1,116 +1,68 @@
 import { useEffect, useState } from 'react'
-import { supabase } from './lib/supabase'
+import { supabase } from './supabaseClient'
 
 export default function Home({ onAdd }) {
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
-  const [loadedImages, setLoadedImages] = useState({})
 
   useEffect(() => {
-    const load = async () => {
-      const { data } = await supabase
+    const loadProducts = async () => {
+      const { data, error } = await supabase
         .from('products')
         .select('*')
         .eq('active', true)
         .order('name')
 
-      setProducts(data || [])
+      if (!error) setProducts(data || [])
       setLoading(false)
     }
 
-    load()
+    loadProducts()
   }, [])
 
-  const onImageLoad = id => {
-    setLoadedImages(prev => ({ ...prev, [id]: true }))
-  }
-
   return (
-    <main
-      style={{
-        padding: '1.5rem',
-        maxWidth: 430,
-        margin: '0 auto',
-        paddingBottom: '7rem'
-      }}
-    >
+    <>
+      {/* HEADER */}
+      <header className="site-header">
+        <img src="/logo.png" alt="In Cucina con Glò" />
+      </header>
+
       {/* HERO */}
       <section className="hero">
-        <h1>IN CUCINA<br />CON GLÒ</h1>
+        <h1>
+          Pasta fresca<br />
+          fatta a mano
+        </h1>
         <p>
-          Pasta fresca artigianale<br />
-          Ritiro in loco o consegna concordata
+          Ordina online.<br />
+          Ritiro o consegna concordata.
         </p>
       </section>
 
-      {loading && <p>Caricamento prodotti…</p>}
-
       {/* PRODOTTI */}
-      <section
-        style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
-          gap: '1.25rem'
-        }}
-      >
-        {products.map(product => (
-          <article
-            key={product.id}
-            style={{
-              background: 'var(--card)',
-              borderRadius: 14,
-              overflow: 'hidden',
-              textAlign: 'center'
-            }}
-          >
-            {/* IMMAGINE */}
-            <div className="image-wrapper">
+      <section className="products">
+        {loading && <p className="loading">Caricamento…</p>}
 
+        {!loading &&
+          products.map(product => (
+            <div key={product.id} className="product-card">
               <img
                 src={product.image_url}
                 alt={product.name}
-                loading="lazy"
-                className="product-image"
               />
+
+              <h3>{product.name}</h3>
+
+              <span className="price">
+                € {product.price.toFixed(2)}
+              </span>
+
+              <button onClick={() => onAdd(product)}>
+                Aggiungi
+              </button>
             </div>
-
-            {/* TESTO */}
-            <div style={{ padding: '0.75rem 0.75rem 0.5rem' }}>
-              <h3 style={{ fontSize: '1rem', fontWeight: 500 }}>
-                {product.name}
-              </h3>
-
-              <p
-                style={{
-                  color: 'var(--gold)',
-                  fontSize: '.9rem',
-                  margin: '.25rem 0 .5rem'
-                }}
-              >
-                € {product.price} / kg
-              </p>
-            </div>
-
-            {/* CTA */}
-            <button
-              onClick={() => onAdd(product)}
-              style={{
-                margin: '0.5rem',
-                width: 'calc(100% - 1rem)',
-                padding: '0.6rem',
-                background: 'var(--gold)',
-                color: '#111',
-                fontWeight: 600,
-                border: 'none',
-                borderRadius: 8,
-                cursor: 'pointer'
-              }}
-            >
-              Aggiungi
-            </button>
-          </article>
-        ))}
+          ))}
       </section>
-    </main>
+    </>
   )
 }
