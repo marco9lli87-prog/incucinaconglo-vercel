@@ -25,20 +25,45 @@ img {
 }
 
 /* HEADER */
+/* HEADER */
 .site-header {
   position: sticky;
   top: 0;
-  z-index: 10;
-  background: rgba(15, 15, 15, 0.95);
-  backdrop-filter: blur(6px);
-  border-bottom: 1px solid #222;
-  padding: 0.75rem 1rem;
-  display: flex;
-  justify-content: center;
+  z-index: 20;
+  background: rgba(15, 15, 15, 0.92);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.site-header img {
-  height: 40px;
+/* contenitore */
+.header-inner {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 1.1rem 1.25rem;
+  display: flex;
+  align-items: center;
+}
+
+/* LOGO SPLIT */
+.logo-split {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+/* icona */
+.logo-icon {
+  height: 34px;        /* leggermente più elegante */
+  width: auto;
+}
+
+/* testo */
+.logo-text {
+  font-family: 'Cinzel', serif;
+  font-size: 0.9rem;
+  letter-spacing: 0.18em;
+  color: var(--gold);
+  white-space: nowrap;
 }
 
 /* HERO */
