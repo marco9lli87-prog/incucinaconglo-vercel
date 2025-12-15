@@ -77,34 +77,27 @@ img {
   display: block;
 }
 
-/* SPLASH LOGO COMPOSIZIONE */
+/* SPLASH LOGO WRAPPER */
 .splash-logo-wrapper {
   position: relative;
   width: 260px;
-  height: 160px;
-  text-align: center;
 }
 
-/* FRUSTA DENTRO IL LOGO */
-.splash-frusta {
+/* LOGO COMPLETO */
+.splash-logo {
+  width: 100%;
+  display: block;
+}
+
+/* FRUSTA SOPRA IL LOGO */
+.splash-frusta-overlay {
   position: absolute;
-  top: 0;
+  top: 18px;          /* regola SOLO questo se serve */
   left: 50%;
   width: 90px;
   transform: translateX(-50%);
   animation: frustaRotate 4s ease-in-out forwards;
-  transform-origin: center center;
-}
-
-/* TESTO LOGO */
-.splash-logo-text {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  color: #d4af37;
-  font-family: 'Cinzel', serif;
-  letter-spacing: 0.15em;
-  font-size: 1.1rem;
+  pointer-events: none;
 }
 
 /* ANIMAZIONE FRUSTA */
@@ -113,10 +106,10 @@ img {
     transform: translateX(-50%) rotate(0deg);
   }
   30% {
-    transform: translateX(-50%) rotate(-15deg);
+    transform: translateX(-50%) rotate(-10deg);
   }
   60% {
-    transform: translateX(-50%) rotate(15deg);
+    transform: translateX(-50%) rotate(10deg);
   }
   100% {
     transform: translateX(-50%) rotate(0deg);
