@@ -179,6 +179,40 @@ img {
    CHECKOUT – BOTTOM SHEET
    ========================= */
 
+/* QUANTITÀ */
+.checkout-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.checkout-qty {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.checkout-qty button {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1px solid var(--gold);
+  background: transparent;
+  color: var(--gold);
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.checkout-qty span {
+  min-width: 18px;
+  text-align: center;
+}
+
+.checkout-price {
+  font-size: 0.85rem;
+}
+
 .checkout-overlay {
   position: fixed;
   inset: 0;
