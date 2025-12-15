@@ -7,8 +7,16 @@ const STATUS_COLORS = {
   consegnato: '#2196f3'
 }
 
+const STATUS_ORDER = {
+  nuovo: 1,
+  gestito: 2,
+  consegnato: 3
+}
+
 export default function Admin() {
   const [orders, setOrders] = useState([])
+  const [onlyNew, setOnlyNew] = useState(false)
+  const [updatingId, setUpdatingId] = useState(null)
 
   useEffect(() => {
     loadOrders()
@@ -30,14 +38,32 @@ export default function Admin() {
           products ( name )
         )
       `)
-      .order('created_at', { ascending: false })
 
-    setOrders(data || [])
+    const sorted = (data || [])
+      .sort(
+        (a, b) =>
+          STATUS_ORDER[a.status] - STATUS_ORDER[b.status] ||
+          new Date(b.created_at) - new Date(a.created_at)
+      )
+
+    setOrders(sorted)
   }
 
   const updateStatus = async (id, status) => {
-    await supabase.from('orders').update({ status }).eq('id', id)
-    loadOrders()
+    setUpdatingId(id)
+
+    await supabase
+      .from('orders')
+      .update({ status })
+      .eq('id', id)
+
+    setOrders(prev =>
+      prev.map(o =>
+        o.id === id ? { ...o, status } : o
+      )
+    )
+
+    setUpdatingId(null)
   }
 
   const whatsappMessage = order => {
@@ -61,18 +87,35 @@ A presto 💛
 `.trim())
   }
 
+  const visibleOrders = onlyNew
+    ? orders.filter(o => o.status === 'nuovo')
+    : orders
+
   return (
     <div style={{ padding: '1.25rem', maxWidth: 600, margin: '0 auto' }}>
-      <h1 style={{ color: '#d4af37' }}>Ordini</h1>
+      <h1 style={{ color: '#d4af37', marginBottom: '0.5rem' }}>
+        Ordini
+      </h1>
 
-      {orders.map(order => (
+      {/* FILTRO */}
+      <label style={{ fontSize: '0.85rem', color: '#ccc' }}>
+        <input
+          type="checkbox"
+          checked={onlyNew}
+          onChange={e => setOnlyNew(e.target.checked)}
+          style={{ marginRight: 6 }}
+        />
+        Mostra solo nuovi
+      </label>
+
+      {visibleOrders.map(order => (
         <div
           key={order.id}
           style={{
             background: '#1a1a1a',
             padding: '1rem',
             borderRadius: 14,
-            marginBottom: '1rem',
+            marginTop: '1rem',
             borderLeft: `4px solid ${STATUS_COLORS[order.status]}`
           }}
         >
@@ -81,9 +124,11 @@ A presto 💛
             ● {order.status}
           </span>
 
-          <p>{order.customer_phone}</p>
+          <p style={{ fontSize: '0.85rem' }}>
+            {order.customer_phone}
+          </p>
 
-          <ul>
+          <ul style={{ marginTop: 6 }}>
             {order.order_items.map((i, idx) => (
               <li key={idx}>
                 {i.products?.name} × {i.quantity}
@@ -91,21 +136,69 @@ A presto 💛
             ))}
           </ul>
 
-          <p><strong>Totale:</strong> € {order.total.toFixed(2)}</p>
+          <p style={{ marginTop: 6 }}>
+            <strong>Totale:</strong> € {order.total.toFixed(2)}
+          </p>
 
-          <div style={{ marginTop: 8 }}>
+          {order.note && (
+            <p style={{ fontStyle: 'italic', color: '#ccc' }}>
+              Note: {order.note}
+            </p>
+          )}
+
+          {/* AZIONI */}
+          <div style={{ marginTop: 10 }}>
             <a
               href={`https://wa.me/39${order.customer_phone}?text=${whatsappMessage(order)}`}
               target="_blank"
               rel="noreferrer"
-              style={{ marginRight: 8 }}
+              style={{
+                marginRight: 10,
+                color: '#d4af37',
+                textDecoration: 'none'
+              }}
             >
               Scrivi su WhatsApp
             </a>
 
-            {order.status !== 'gestito' && (
-              <button onClick={() => updateStatus(order.id, 'gestito')}>
+            {order.status === 'nuovo' && (
+              <button
+                disabled={updatingId === order.id}
+                onClick={() => updateStatus(order.id, 'gestito')}
+                style={{
+                  marginRight: 6,
+                  background: '#4caf50',
+                  color: '#000',
+                  border: 'none',
+                  borderRadius: 8,
+                  padding: '0.35rem 0.6rem',
+                  fontSize: '0.75rem',
+                  fontWeight: 600,
+                  opacity: updatingId === order.id ? 0.6 : 1,
+                  cursor: 'pointer'
+                }}
+              >
                 Gestito
+              </button>
+            )}
+
+            {order.status !== 'consegnato' && (
+              <button
+                disabled={updatingId === order.id}
+                onClick={() => updateStatus(order.id, 'consegnato')}
+                style={{
+                  background: '#2196f3',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: 8,
+                  padding: '0.35rem 0.6rem',
+                  fontSize: '0.75rem',
+                  fontWeight: 600,
+                  opacity: updatingId === order.id ? 0.6 : 1,
+                  cursor: 'pointer'
+                }}
+              >
+                Completa
               </button>
             )}
           </div>
