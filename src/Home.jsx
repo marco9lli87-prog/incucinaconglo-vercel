@@ -22,6 +22,28 @@ export default function Home({ onAdd }) {
 
   return (
     <main className="home">
+      {/* HEADER */}
+      <header className="header">
+        <div className="header-inner">
+          {/* LOGO / SIMBOLO */}
+          <img
+            src="/logo.png"
+            alt="In Cucina con Glò"
+            className="header-logo"
+          />
+
+          {/* TESTO */}
+          <div className="header-text">
+            <span className="header-title">
+              In Cucina con Glò
+            </span>
+            <span className="header-subtitle">
+              Pasta fresca artigianale
+            </span>
+          </div>
+        </div>
+      </header>
+
       {/* HERO */}
       <section className="hero">
         <h1 className="hero-title">
