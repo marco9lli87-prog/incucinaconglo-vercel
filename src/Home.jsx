@@ -31,17 +31,18 @@ export default function Home({ onAdd }) {
       <section className="hero">
         <h1>
           Pasta fresca<br />
-          fatta a mano
+          fatta come a casa
         </h1>
+
         <p>
-          Ordina online.<br />
-          Ritiro o consegna concordata.
+          Preparata a mano, con ingredienti semplici.<br />
+          Ordina oggi e scegli se ritirare o ricevere a casa.
         </p>
       </section>
 
       {/* PRODOTTI */}
       <section className="products">
-        {loading && <p className="loading">Caricamento…</p>}
+        {loading && <p className="loading">Sto preparando il banco…</p>}
 
         {!loading &&
           products.map(product => (
@@ -58,7 +59,7 @@ export default function Home({ onAdd }) {
               </span>
 
               <button onClick={() => onAdd(product)}>
-                Aggiungi
+                Aggiungi al carrello
               </button>
             </div>
           ))}
