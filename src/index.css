@@ -316,3 +316,37 @@ img {
     transform: translateY(0);
   }
 }
+
+/* =========================
+   BOTTONE CARRELLO – DEFINITIVO
+   ========================= */
+
+.cart-button {
+  position: fixed;
+  bottom: 1.25rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  background: var(--gold);
+  color: #000;
+
+  padding: 0.9rem 1.7rem;
+  border-radius: 999px;
+
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+
+  border: none;
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.45);
+
+  z-index: 40;
+}
+
+/* feedback touch */
+.cart-button:active {
+  transform: translateX(-50%) scale(0.96);
+}
