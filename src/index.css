@@ -175,12 +175,14 @@ img {
 }
 
 
-/* CHECKOUT – BOTTOM SHEET */
+/* =========================
+   CHECKOUT – BOTTOM SHEET
+   ========================= */
 
 .checkout-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.55);
   z-index: 50;
   display: flex;
   justify-content: center;
@@ -191,14 +193,14 @@ img {
   width: 100%;
   max-width: 480px;
   background: var(--bg);
-  border-radius: 20px 20px 0 0;
+  border-radius: 22px 22px 0 0;
   padding: 1.25rem;
   animation: slideUp 0.3s ease-out;
 }
 
-/* maniglietta */
+/* maniglia */
 .sheet-handle {
-  width: 40px;
+  width: 44px;
   height: 4px;
   background: #333;
   border-radius: 2px;
@@ -207,55 +209,71 @@ img {
 
 .checkout-sheet h2 {
   color: var(--gold);
-  margin-bottom: 1rem;
   text-align: center;
+  margin-bottom: 0.75rem;
+}
+
+/* RIEPILOGO */
+.checkout-summary {
+  background: #141414;
+  border: 1px solid #222;
+  border-radius: 14px;
+  padding: 0.75rem;
+  margin-bottom: 0.75rem;
 }
 
 .checkout-row {
   display: flex;
   justify-content: space-between;
   font-size: 0.9rem;
-  margin-bottom: 0.4rem;
+  margin-bottom: 0.35rem;
 }
 
 .checkout-total {
-  margin: 1rem 0;
-  font-weight: 600;
   text-align: right;
+  font-weight: 600;
+  margin-bottom: 1rem;
 }
 
-.checkout-sheet input,
-.checkout-sheet textarea {
+/* FORM */
+.checkout-form input,
+.checkout-form textarea {
   width: 100%;
   background: #1a1a1a;
   border: 1px solid #333;
   color: white;
-  padding: 0.6rem;
+  padding: 0.65rem;
   border-radius: 10px;
   margin-bottom: 0.6rem;
 }
 
-.checkout-sheet textarea {
+.checkout-form textarea {
   resize: none;
   height: 70px;
 }
 
-.checkout-sheet button {
+/* BOTTONI */
+.checkout-submit {
   width: 100%;
-  padding: 0.75rem;
-  border-radius: 12px;
+  padding: 0.8rem;
+  border-radius: 14px;
   border: none;
   background: var(--gold);
   color: #000;
-  margin-top: 0.5rem;
+  font-weight: 600;
+  margin-top: 0.4rem;
 }
 
-.checkout-sheet .link {
+.checkout-cancel {
+  width: 100%;
+  margin-top: 0.4rem;
   background: none;
+  border: none;
   color: var(--muted);
+  font-size: 0.85rem;
 }
 
-/* animazione */
+/* ANIMAZIONE */
 @keyframes slideUp {
   from {
     transform: translateY(100%);
@@ -263,19 +281,4 @@ img {
   to {
     transform: translateY(0);
   }
-}
-
-/* BOTTONE CARRELLO */
-.cart-button {
-  position: fixed;
-  bottom: 1rem;
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--gold);
-  color: #000;
-  border: none;
-  padding: 0.9rem 1.5rem;
-  border-radius: 999px;
-  font-weight: 600;
-  z-index: 40;
 }
