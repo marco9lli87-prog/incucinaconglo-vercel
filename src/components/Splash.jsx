@@ -23,19 +23,20 @@ export default function Splash({ onFinish }) {
         zIndex: 9999
       }}
     >
-      {/* LOGO WRAPPER */}
       <div className="splash-logo-wrapper">
-        {/* FRUSTA */}
+        {/* LOGO COMPLETO STATICO */}
+        <img
+          src="/logo.png"
+          alt="In Cucina con Glò"
+          className="splash-logo"
+        />
+
+        {/* FRUSTA ANIMATA SOPRA */}
         <img
           src="/frusta.png"
           alt=""
-          className="splash-frusta"
+          className="splash-frusta-overlay"
         />
-
-        {/* TESTO LOGO */}
-        <h1 className="splash-logo-text">
-          IN CUCINA CON GLÒ
-        </h1>
       </div>
     </div>
   )
