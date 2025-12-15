@@ -32,7 +32,7 @@ img {
   z-index: 100;
   background: var(--bg);
   padding: 0.7rem 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
 }
 
 .header-inner {
@@ -44,12 +44,10 @@ img {
 
 .header-logo-icon {
   width: 36px;
-  height: auto;
 }
 
 .header-logo-text {
   height: 22px;
-  width: auto;
 }
 
 /* =========================
@@ -80,7 +78,6 @@ img {
 .hero-note {
   font-size: 0.8rem;
   color: var(--gold);
-  letter-spacing: 0.3px;
 }
 
 /* =========================
@@ -101,12 +98,9 @@ img {
   background: var(--card);
   border-radius: 18px;
   overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  width: 100%;
 }
 
-/* Fade-in animation */
+/* Fade-in */
 .fade-in {
   opacity: 0;
   transform: translateY(12px);
@@ -135,7 +129,6 @@ img {
 
 .product-name {
   font-size: 1rem;
-  line-height: 1.25;
 }
 
 .product-price {
@@ -155,7 +148,34 @@ img {
 }
 
 /* =========================
-   TRUST
+   CART BUTTON
+   ========================= */
+
+.cart-button {
+  position: fixed;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 200;
+
+  background: var(--gold);
+  color: #000;
+  font-weight: 700;
+
+  padding: 0.7rem 1.4rem;
+  border-radius: 999px;
+  border: none;
+
+  box-shadow: 0 8px 20px rgba(0,0,0,0.35);
+}
+
+/* spazio per carrello */
+.home {
+  padding-bottom: 5rem;
+}
+
+/* =========================
+   TRUST + FOOTER
    ========================= */
 
 .trust {
@@ -166,12 +186,7 @@ img {
 .trust-text {
   font-size: 0.85rem;
   color: var(--muted);
-  line-height: 1.4;
 }
-
-/* =========================
-   FOOTER
-   ========================= */
 
 .home-footer {
   padding: 1.5rem 1rem 2rem;
@@ -181,5 +196,4 @@ img {
 .footer-note {
   font-size: 0.85rem;
   color: var(--muted);
-  line-height: 1.4;
 }
