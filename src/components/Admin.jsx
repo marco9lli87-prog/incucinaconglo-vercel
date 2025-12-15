@@ -39,63 +39,98 @@ export default function Admin() {
         )
       `)
 
-    const sorted = (data || [])
-      .sort(
-        (a, b) =>
-          STATUS_ORDER[a.status] - STATUS_ORDER[b.status] ||
-          new Date(b.created_at) - new Date(a.created_at)
-      )
+    const sorted = (data || []).sort(
+      (a, b) =>
+        STATUS_ORDER[a.status] - STATUS_ORDER[b.status] ||
+        new Date(b.created_at) - new Date(a.created_at)
+    )
 
     setOrders(sorted)
   }
 
-  const updateStatus = async (id, status) => {
-    setUpdatingId(id)
-
-    await supabase
-      .from('orders')
-      .update({ status })
-      .eq('id', id)
-
-    setOrders(prev =>
-      prev.map(o =>
-        o.id === id ? { ...o, status } : o
-      )
-    )
-
-    setUpdatingId(null)
-  }
-
-  const whatsappMessage = order => {
+  const sendWhatsappConfirmation = order => {
     const items = order.order_items
       .map(i => `• ${i.products?.name} x${i.quantity}`)
       .join('\n')
 
-    return encodeURIComponent(`
+    const message = `
 Ciao ${order.customer_name}! 😊
 sono Glò 🍝
 
-Ho ricevuto il tuo ordine e va tutto bene 👍
+Ho preso in carico il tuo ordine 👍
 
 ${items}
 
 Totale: € ${order.total.toFixed(2)}
 
-Possiamo sentirci per accordarci
-su ritiro o consegna?
+Possiamo accordarci per
+ritiro o consegna?
 A presto 💛
-`.trim())
+`.trim()
+
+    window.open(
+      `https://wa.me/39${order.customer_phone}?text=${encodeURIComponent(message)}`,
+      '_blank'
+    )
+  }
+
+  const updateStatus = async (order, newStatus) => {
+    setUpdatingId(order.id)
+
+    await supabase
+      .from('orders')
+      .update({ status: newStatus })
+      .eq('id', order.id)
+
+    setOrders(prev =>
+      prev.map(o =>
+        o.id === order.id ? { ...o, status: newStatus } : o
+      )
+    )
+
+    // WhatsApp automatico SOLO quando diventa "gestito"
+    if (order.status === 'nuovo' && newStatus === 'gestito') {
+      sendWhatsappConfirmation(order)
+    }
+
+    setUpdatingId(null)
   }
 
   const visibleOrders = onlyNew
     ? orders.filter(o => o.status === 'nuovo')
     : orders
 
+  const newCount = orders.filter(o => o.status === 'nuovo').length
+
   return (
     <div style={{ padding: '1.25rem', maxWidth: 600, margin: '0 auto' }}>
-      <h1 style={{ color: '#d4af37', marginBottom: '0.5rem' }}>
-        Ordini
-      </h1>
+      {/* HEADER */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          marginBottom: '0.5rem'
+        }}
+      >
+        <h1 style={{ color: '#d4af37', marginRight: 8 }}>
+          Ordini
+        </h1>
+
+        {newCount > 0 && (
+          <span
+            style={{
+              background: '#d4af37',
+              color: '#000',
+              borderRadius: 999,
+              padding: '0.2rem 0.55rem',
+              fontSize: '0.75rem',
+              fontWeight: 600
+            }}
+          >
+            {newCount}
+          </span>
+        )}
+      </div>
 
       {/* FILTRO */}
       <label style={{ fontSize: '0.85rem', color: '#ccc' }}>
@@ -148,23 +183,10 @@ A presto 💛
 
           {/* AZIONI */}
           <div style={{ marginTop: 10 }}>
-            <a
-              href={`https://wa.me/39${order.customer_phone}?text=${whatsappMessage(order)}`}
-              target="_blank"
-              rel="noreferrer"
-              style={{
-                marginRight: 10,
-                color: '#d4af37',
-                textDecoration: 'none'
-              }}
-            >
-              Scrivi su WhatsApp
-            </a>
-
             {order.status === 'nuovo' && (
               <button
                 disabled={updatingId === order.id}
-                onClick={() => updateStatus(order.id, 'gestito')}
+                onClick={() => updateStatus(order, 'gestito')}
                 style={{
                   marginRight: 6,
                   background: '#4caf50',
@@ -174,8 +196,7 @@ A presto 💛
                   padding: '0.35rem 0.6rem',
                   fontSize: '0.75rem',
                   fontWeight: 600,
-                  opacity: updatingId === order.id ? 0.6 : 1,
-                  cursor: 'pointer'
+                  opacity: updatingId === order.id ? 0.6 : 1
                 }}
               >
                 Gestito
@@ -185,7 +206,7 @@ A presto 💛
             {order.status !== 'consegnato' && (
               <button
                 disabled={updatingId === order.id}
-                onClick={() => updateStatus(order.id, 'consegnato')}
+                onClick={() => updateStatus(order, 'consegnato')}
                 style={{
                   background: '#2196f3',
                   color: '#fff',
@@ -194,8 +215,7 @@ A presto 💛
                   padding: '0.35rem 0.6rem',
                   fontSize: '0.75rem',
                   fontWeight: 600,
-                  opacity: updatingId === order.id ? 0.6 : 1,
-                  cursor: 'pointer'
+                  opacity: updatingId === order.id ? 0.6 : 1
                 }}
               >
                 Completa
