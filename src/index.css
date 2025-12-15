@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&display=swap');
-
 :root {
   --bg: #0f0f0f;
   --card: #1a1a1a;
@@ -20,277 +18,8 @@ body {
 }
 
 img {
+  display: block;
   max-width: 100%;
-  display: block;
-}
-
-
-
-/* =========================
-   HERO
-   ========================= */
-
-.hero {
-  padding: 3.5rem 1.5rem 2.5rem;
-  text-align: center;
-}
-
-.hero h1 {
-  font-family: 'Cinzel', serif;
-  font-size: 2.2rem;
-  line-height: 1.15;
-  color: var(--gold);
-  margin-bottom: 1.1rem;
-}
-
-.hero p {
-  color: var(--muted);
-  font-size: 1.05rem;
-  line-height: 1.55;
-  margin-bottom: 0.75rem;
-}
-
-.hero-sub {
-  display: block;
-  font-size: 0.85rem;
-  color: #777;
-  letter-spacing: 0.08em;
-}
-
-/* =========================
-   PRODOTTI
-   ========================= */
-
-.products {
-  padding: 2rem 1.25rem 7rem;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1.25rem;
-}
-
-.product-card {
-  background: linear-gradient(180deg, #1b1b1b, #151515);
-  border-radius: 18px;
-  padding: 0.9rem;
-  text-align: center;
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
-}
-
-.product-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.45);
-}
-
-.product-card img {
-  border-radius: 14px;
-  margin-bottom: 0.7rem;
-  aspect-ratio: 1 / 1;
-  object-fit: cover;
-}
-
-.product-card h3 {
-  font-size: 0.95rem;
-  font-weight: 500;
-  margin-bottom: 0.3rem;
-}
-
-.product-card .price {
-  color: var(--gold);
-  font-weight: 600;
-  font-size: 0.95rem;
-  margin-bottom: 0.7rem;
-  display: block;
-}
-
-.product-card button {
-  background: transparent;
-  border: 1px solid var(--gold);
-  color: var(--gold);
-  padding: 0.55rem;
-  width: 100%;
-  border-radius: 12px;
-  font-size: 0.85rem;
-  transition: background 0.25s ease, color 0.25s ease, transform 0.1s ease;
-}
-
-.product-card button:hover {
-  background: var(--gold);
-  color: #000;
-}
-
-.product-card button:active {
-  transform: scale(0.96);
-}
-
-/* =========================
-   BOTTONE CARRELLO
-   ========================= */
-
-.cart-button {
-  position: fixed;
-  bottom: 1.25rem;
-  left: 50%;
-  transform: translateX(-50%);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--gold);
-  color: #000;
-  padding: 0.9rem 1.7rem;
-  border-radius: 999px;
-  font-size: 0.95rem;
-  font-weight: 600;
-  border: none;
-  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.45);
-  z-index: 40;
-}
-
-.cart-button:active {
-  transform: translateX(-50%) scale(0.96);
-}
-
-/* =========================
-   CHECKOUT – BOTTOM SHEET
-   ========================= */
-
-.checkout-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.55);
-  z-index: 50;
-  display: flex;
-  justify-content: center;
-  align-items: flex-end;
-}
-
-.checkout-sheet {
-  width: 100%;
-  max-width: 480px;
-  background: var(--bg);
-  border-radius: 22px 22px 0 0;
-  padding: 1.25rem;
-  animation: slideUp 0.3s ease-out;
-}
-
-.sheet-handle {
-  width: 44px;
-  height: 4px;
-  background: #333;
-  border-radius: 2px;
-  margin: 0 auto 0.75rem;
-}
-
-.checkout-sheet h2 {
-  color: var(--gold);
-  text-align: center;
-  margin-bottom: 0.75rem;
-}
-
-.checkout-redirect {
-  text-align: center;
-  font-size: 0.9rem;
-  color: var(--gold);
-  margin-bottom: 0.75rem;
-}
-
-.checkout-info {
-  font-size: 0.8rem;
-  color: var(--muted);
-  text-align: center;
-  line-height: 1.4;
-  margin: 0.5rem 0 0.75rem;
-}
-
-.checkout-summary {
-  background: #141414;
-  border: 1px solid #222;
-  border-radius: 14px;
-  padding: 0.75rem;
-  margin-bottom: 0.75rem;
-}
-
-.checkout-row {
-  display: grid;
-  grid-template-columns: 1fr auto auto;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.9rem;
-  margin-bottom: 0.35rem;
-}
-
-.checkout-qty {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-}
-
-.checkout-qty button {
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  border: 1px solid var(--gold);
-  background: transparent;
-  color: var(--gold);
-  font-size: 1rem;
-}
-
-.checkout-qty span {
-  min-width: 18px;
-  text-align: center;
-}
-
-.checkout-price {
-  font-size: 0.85rem;
-}
-
-.checkout-total {
-  text-align: right;
-  font-weight: 600;
-  margin-bottom: 1rem;
-}
-
-.checkout-form input,
-.checkout-form textarea {
-  width: 100%;
-  background: #1a1a1a;
-  border: 1px solid #333;
-  color: white;
-  padding: 0.65rem;
-  border-radius: 10px;
-  margin-bottom: 0.6rem;
-}
-
-.checkout-form textarea {
-  resize: none;
-  height: 70px;
-}
-
-.checkout-submit {
-  width: 100%;
-  padding: 0.8rem;
-  border-radius: 14px;
-  border: none;
-  background: var(--gold);
-  color: #000;
-  font-weight: 600;
-}
-
-.checkout-cancel {
-  width: 100%;
-  margin-top: 0.4rem;
-  background: none;
-  border: none;
-  color: var(--muted);
-  font-size: 0.85rem;
-}
-
-@keyframes slideUp {
-  from {
-    transform: translateY(100%);
-  }
-  to {
-    transform: translateY(0);
-  }
 }
 
 /* =========================
@@ -302,8 +31,8 @@ img {
   top: 0;
   z-index: 100;
   background: var(--bg);
-  padding: 0.6rem 0;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
+  padding: 0.7rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .header-inner {
@@ -313,13 +42,11 @@ img {
   gap: 0.6rem;
 }
 
-/* Icona */
 .header-logo-icon {
   width: 36px;
   height: auto;
 }
 
-/* Testo */
 .header-logo-text {
   height: 22px;
   width: auto;
@@ -331,109 +58,55 @@ img {
 
 .hero {
   text-align: center;
-  padding: 1.5rem 1rem 1rem;
+  padding: 2.2rem 1.2rem 1.8rem;
+  max-width: 720px;
+  margin: 0 auto;
 }
 
 .hero-title {
-  font-size: 1.6rem;
-  margin-bottom: 0.5rem;
-}
-
-.hero-subtitle {
-  font-size: 0.95rem;
-  color: var(--muted);
-  line-height: 1.4;
-}
-
-.hero-note {
-  margin-top: 0.6rem;
-  font-size: 0.75rem;
+  font-size: 1.8rem;
+  line-height: 1.25;
+  margin-bottom: 1rem;
   color: var(--gold);
 }
 
+.hero-subtitle {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--muted);
+  margin-bottom: 0.9rem;
+}
+
+.hero-note {
+  font-size: 0.8rem;
+  color: var(--gold);
+  letter-spacing: 0.3px;
+}
+
 /* =========================
-   PRODUCTS GRID (2 COLONNE)
+   PRODUCTS
    ========================= */
 
 .products {
-  padding: 1rem;
+  padding: 1.4rem 0.6rem 1rem;
 }
 
 .products-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.8rem;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.7rem;
 }
 
 .product-card {
   background: var(--card);
-  border-radius: 14px;
+  border-radius: 18px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-}
-
-.product-image {
   width: 100%;
-  aspect-ratio: 1 / 1;
-  object-fit: cover;
 }
 
-.product-info {
-  padding: 0.6rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-}
-
-.product-name {
-  font-size: 0.9rem;
-}
-
-.product-price {
-  font-size: 0.85rem;
-  color: var(--gold);
-}
-
-.product-add {
-  margin-top: 0.4rem;
-  padding: 0.4rem;
-  border-radius: 8px;
-  border: none;
-  background: var(--gold);
-  color: #000;
-  font-weight: 600;
-}
-
-/* =========================
-   TRUST + FOOTER
-   ========================= */
-
-.trust {
-  padding: 1rem;
-  text-align: center;
-}
-
-.trust-text {
-  font-size: 0.85rem;
-  color: var(--muted);
-}
-
-.home-footer {
-  padding: 1.5rem 1rem 2rem;
-  text-align: center;
-}
-
-.footer-note {
-  font-size: 0.85rem;
-  color: var(--muted);
-  line-height: 1.4;
-}
-
-/* =========================
-   FADE IN PRODOTTI
-   ========================= */
-
+/* Fade-in animation */
 .fade-in {
   opacity: 0;
   transform: translateY(12px);
@@ -445,4 +118,68 @@ img {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+.product-image {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+}
+
+.product-info {
+  padding: 0.7rem 0.6rem 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.product-name {
+  font-size: 1rem;
+  line-height: 1.25;
+}
+
+.product-price {
+  font-size: 0.95rem;
+  color: var(--gold);
+}
+
+.product-add {
+  margin-top: 0.6rem;
+  padding: 0.45rem;
+  border-radius: 10px;
+  border: 1px solid var(--gold);
+  background: transparent;
+  color: var(--gold);
+  font-weight: 600;
+  width: 100%;
+}
+
+/* =========================
+   TRUST
+   ========================= */
+
+.trust {
+  padding: 1.2rem 1rem 0.8rem;
+  text-align: center;
+}
+
+.trust-text {
+  font-size: 0.85rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+/* =========================
+   FOOTER
+   ========================= */
+
+.home-footer {
+  padding: 1.5rem 1rem 2rem;
+  text-align: center;
+}
+
+.footer-note {
+  font-size: 0.85rem;
+  color: var(--muted);
+  line-height: 1.4;
 }
