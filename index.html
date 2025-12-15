@@ -2,13 +2,42 @@
 <html lang="it">
   <head>
     <meta charset="UTF-8" />
+
+    <!-- FAVICON -->
+    <link rel="icon" type="image/png" href="/favicon.png" />
+
+    <!-- VIEWPORT -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>In Cucina con Glò</title>
+
+    <!-- SEO BASE -->
+    <title>In Cucina con Glò – Pasta fresca artigianale</title>
+    <meta
+      name="description"
+      content="Pasta fresca artigianale fatta a mano. Ordina online e ricevi conferma su WhatsApp. Ritiro o consegna concordata."
+    />
+
+    <!-- OPEN GRAPH / WHATSAPP -->
+    <meta property="og:title" content="In Cucina con Glò" />
+    <meta
+      property="og:description"
+      content="Pasta fresca artigianale fatta a mano. Ordina online e ricevi conferma su WhatsApp."
+    />
+    <meta property="og:image" content="/og-image.png" />
+    <meta property="og:type" content="website" />
+    <meta
+      property="og:url"
+      content="https://incucinaconglo.vercel.app"
+    />
+
+    <!-- TWITTER (fallback, ok anche se non usato) -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="/og-image.png" />
   </head>
+
   <body>
     <div id="root"></div>
 
-    <!-- Vite entry point -->
+    <!-- VITE ENTRY POINT -->
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
