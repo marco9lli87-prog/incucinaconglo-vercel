@@ -89,7 +89,7 @@ Glò`
             key={f}
             style={{
               ...filterBtn,
-              background: filter === f ? "#d4af37" : "#333",
+              background: filter === f ? "#d4af37" : "#2a2a2a",
               color: filter === f ? "#000" : "#fff",
             }}
             onClick={() => setFilter(f)}
@@ -99,25 +99,28 @@ Glò`
         ))}
       </div>
 
-      {filteredOrders.length === 0 && <p>Nessun ordine</p>}
-
       {filteredOrders.map(order => (
-        <div key={order.id} style={card}>
+        <div
+          key={order.id}
+          style={{
+            ...card,
+            borderLeft: `4px solid ${statusColor(order.status)}`,
+          }}
+        >
           <div style={rowBetween}>
             <strong>{order.customer_name}</strong>
-            <span>{new Date(order.created_at).toLocaleString()}</span>
-          </div>
-
-          <div style={rowBetween}>
-            <span>📞 {order.customer_phone}</span>
-            <span style={statusBadge(order.status)}>
-              {STATUS_LABELS[order.status] || order.status}
+            <span style={date}>
+              {new Date(order.created_at).toLocaleString()}
             </span>
           </div>
 
-          {order.note && <div style={note}>Note: {order.note}</div>}
+          <div style={meta}>
+            {order.customer_phone} · {STATUS_LABELS[order.status]}
+          </div>
 
-          <ul>
+          {order.note && <div style={note}>{order.note}</div>}
+
+          <ul style={items}>
             {order.order_items.map(item => (
               <li key={item.id}>
                 {item.products?.name} x {item.quantity}
@@ -141,14 +144,14 @@ Glò`
             </a>
 
             <button
-              style={btnYellow}
+              style={btnSmall}
               onClick={() => updateStatus(order.id, "gestito")}
             >
-              In gestione
+              Gestione
             </button>
 
             <button
-              style={btnBlue}
+              style={btnSmall}
               onClick={() => updateStatus(order.id, "completato")}
             >
               Completato
@@ -174,29 +177,40 @@ const title = {
 
 const filters = {
   display: "flex",
-  gap: 8,
-  marginBottom: 16,
+  gap: 6,
+  marginBottom: 14,
   flexWrap: "wrap",
 }
 
 const filterBtn = {
   border: "none",
-  borderRadius: 8,
-  padding: "6px 10px",
+  borderRadius: 6,
+  padding: "4px 8px",
+  fontSize: 13,
 }
 
 const card = {
   background: "#1a1a1a",
   padding: 12,
-  borderRadius: 10,
-  marginBottom: 16,
+  borderRadius: 8,
+  marginBottom: 12,
 }
 
 const rowBetween = {
   display: "flex",
   justifyContent: "space-between",
+  marginBottom: 4,
+}
+
+const date = {
+  fontSize: 12,
+  opacity: 0.7,
+}
+
+const meta = {
+  fontSize: 13,
+  opacity: 0.85,
   marginBottom: 6,
-  gap: 8,
 }
 
 const note = {
@@ -205,49 +219,42 @@ const note = {
   marginBottom: 6,
 }
 
+const items = {
+  fontSize: 14,
+  marginBottom: 6,
+  paddingLeft: 16,
+}
+
 const actions = {
   display: "flex",
-  gap: 8,
-  marginTop: 10,
+  gap: 6,
+  marginTop: 8,
   flexWrap: "wrap",
 }
 
-const statusBadge = (status) => ({
+const btnSmall = {
+  background: "#2a2a2a",
+  color: "#fff",
+  border: "none",
   padding: "4px 8px",
-  borderRadius: 12,
+  borderRadius: 6,
   fontSize: 12,
-  background:
-    status === "gestito"
-      ? "#facc15"
-      : status === "completato"
-      ? "#3b82f6"
-      : "#555",
-  color:
-    status === "gestito"
-      ? "#000"
-      : "#fff",
-})
+}
 
 const btnWhatsapp = {
   background: "#16a34a",
   color: "#fff",
-  padding: "6px 12px",
+  padding: "4px 8px",
   borderRadius: 6,
+  fontSize: 12,
   textDecoration: "none",
 }
 
-const btnYellow = {
-  background: "#facc15",
-  color: "#000",
-  border: "none",
-  padding: "6px 10px",
-  borderRadius: 6,
-}
+/* ===== UTILS ===== */
 
-const btnBlue = {
-  background: "#3b82f6",
-  color: "#fff",
-  border: "none",
-  padding: "6px 10px",
-  borderRadius: 6,
+const statusColor = (status) => {
+  if (status === "gestito") return "#facc15"
+  if (status === "completato") return "#3b82f6"
+  if (status === "annullato") return "#dc2626"
+  return "#555"
 }
