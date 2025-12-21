@@ -210,8 +210,10 @@ const btnDanger = {
 }
 
 const image = {
-  width: "100%",
-  maxWidth: 200,
+  height: 80,
+  width: "auto",
+  maxWidth: "100%",
+  objectFit: "contain",
   margin: "8px 0",
   borderRadius: 6,
 }
