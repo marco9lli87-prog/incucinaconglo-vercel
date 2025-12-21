@@ -1,239 +1,211 @@
-import { useEffect, useState } from 'react'
-import { supabase } from '../lib/supabase'
+import { useEffect, useState } from "react"
+import { supabase } from "../lib/supabase"
 
-const STATUS_COLORS = {
-  nuovo: '#d4af37',
-  gestito: '#4caf50',
-  consegnato: '#2196f3'
-}
-
-const STATUS_ORDER = {
-  nuovo: 1,
-  gestito: 2,
-  consegnato: 3
+const STATUS = {
+  NUOVO: "nuovo",
+  GESTITO: "gestito",
+  CONSEGNATO: "consegnato",
+  ANNULLATO: "annullato",
 }
 
 export default function Admin() {
   const [orders, setOrders] = useState([])
+  const [loading, setLoading] = useState(true)
   const [onlyNew, setOnlyNew] = useState(false)
-  const [updatingId, setUpdatingId] = useState(null)
+
+  // modali
+  const [editing, setEditing] = useState(null)
+  const [creating, setCreating] = useState(false)
+
+  // form
+  const [name, setName] = useState("")
+  const [phone, setPhone] = useState("")
+  const [note, setNote] = useState("")
 
   useEffect(() => {
     loadOrders()
   }, [])
 
   const loadOrders = async () => {
+    setLoading(true)
     const { data } = await supabase
-      .from('orders')
-      .select(`
-        id,
-        created_at,
-        customer_name,
-        customer_phone,
-        total,
-        note,
-        status,
-        order_items (
-          quantity,
-          products ( name )
-        )
-      `)
+      .from("orders")
+      .select("*")
+      .order("created_at", { ascending: false })
 
-    const sorted = (data || []).sort(
-      (a, b) =>
-        STATUS_ORDER[a.status] - STATUS_ORDER[b.status] ||
-        new Date(b.created_at) - new Date(a.created_at)
-    )
-
-    setOrders(sorted)
+    setOrders(data || [])
+    setLoading(false)
   }
 
-  const buildWhatsappUrl = order => {
-    const items = order.order_items
-      .map(i => `• ${i.products?.name} x${i.quantity}`)
-      .join('\n')
+  /* =========================
+     CRUD ORDINI
+     ========================= */
 
-    const message = `
-Ciao ${order.customer_name}! 😊
-sono Glò 🍝
-
-Ho preso in carico il tuo ordine 👍
-
-${items}
-
-Totale: € ${order.total.toFixed(2)}
-
-Possiamo accordarci per
-ritiro o consegna?
-A presto 💛
-`.trim()
-
-    return (
-      `https://wa.me/39${order.customer_phone}?text=` +
-      encodeURIComponent(message)
-    )
+  const openEdit = (order) => {
+    setEditing(order)
+    setName(order.customer_name || "")
+    setPhone(order.customer_phone || "")
+    setNote(order.note || "")
   }
 
-  const markAsGestito = async order => {
-    // ✅ APERTURA IMMEDIATA (iOS SAFE)
-    window.location.href = buildWhatsappUrl(order)
-
-    setUpdatingId(order.id)
-
-    // ⬇️ UPDATE IN BACKGROUND
+  const saveEdit = async () => {
     await supabase
-      .from('orders')
-      .update({ status: 'gestito' })
-      .eq('id', order.id)
+      .from("orders")
+      .update({
+        customer_name: name,
+        customer_phone: phone,
+        note: note,
+      })
+      .eq("id", editing.id)
 
-    setOrders(prev =>
-      prev.map(o =>
-        o.id === order.id ? { ...o, status: 'gestito' } : o
-      )
-    )
-
-    setUpdatingId(null)
+    setEditing(null)
+    loadOrders()
   }
 
-  const markAsCompleto = async order => {
-    setUpdatingId(order.id)
+  const cancelOrder = async (orderId) => {
+    if (!confirm("Annullare questo ordine?")) return
 
     await supabase
-      .from('orders')
-      .update({ status: 'consegnato' })
-      .eq('id', order.id)
+      .from("orders")
+      .update({ status: STATUS.ANNULLATO })
+      .eq("id", orderId)
 
-    setOrders(prev =>
-      prev.map(o =>
-        o.id === order.id ? { ...o, status: 'consegnato' } : o
-      )
-    )
-
-    setUpdatingId(null)
+    loadOrders()
   }
+
+  const createOrder = async () => {
+    if (!name || !phone) {
+      alert("Nome e telefono obbligatori")
+      return
+    }
+
+    await supabase.from("orders").insert({
+      customer_name: name,
+      customer_phone: phone,
+      note,
+      total: 0,
+      status: STATUS.GESTITO,
+    })
+
+    setCreating(false)
+    setName("")
+    setPhone("")
+    setNote("")
+    loadOrders()
+  }
+
+  /* ========================= */
 
   const visibleOrders = onlyNew
-    ? orders.filter(o => o.status === 'nuovo')
+    ? orders.filter(o => o.status === STATUS.NUOVO)
     : orders
 
-  const newCount = orders.filter(o => o.status === 'nuovo').length
-
   return (
-    <div style={{ padding: '1.25rem', maxWidth: 600, margin: '0 auto' }}>
-      {/* HEADER */}
-      <div style={{ display: 'flex', alignItems: 'center' }}>
-        <h1 style={{ color: '#d4af37', marginRight: 8 }}>
-          Ordini
-        </h1>
+    <div style={{ padding: 16, maxWidth: 720, margin: "0 auto", color: "#fff" }}>
+      <h1 style={{ color: "#d4af37" }}>Admin Ordini</h1>
 
-        {newCount > 0 && (
-          <span
-            style={{
-              background: '#d4af37',
-              color: '#000',
-              borderRadius: 999,
-              padding: '0.2rem 0.55rem',
-              fontSize: '0.75rem',
-              fontWeight: 600
-            }}
-          >
-            {newCount}
-          </span>
-        )}
+      <div style={{ display: "flex", gap: 10, marginBottom: 12 }}>
+        <button onClick={() => setCreating(true)}>+ Nuovo ordine</button>
+
+        <label>
+          <input
+            type="checkbox"
+            checked={onlyNew}
+            onChange={e => setOnlyNew(e.target.checked)}
+          />{" "}
+          Solo nuovi
+        </label>
       </div>
 
-      {/* FILTRO */}
-      <label style={{ fontSize: '0.85rem', color: '#ccc' }}>
-        <input
-          type="checkbox"
-          checked={onlyNew}
-          onChange={e => setOnlyNew(e.target.checked)}
-          style={{ marginRight: 6 }}
-        />
-        Mostra solo nuovi
-      </label>
+      {loading && <p>Caricamento…</p>}
 
       {visibleOrders.map(order => (
         <div
           key={order.id}
           style={{
-            background: '#1a1a1a',
-            padding: '1rem',
-            borderRadius: 14,
-            marginTop: '1rem',
-            borderLeft: `4px solid ${STATUS_COLORS[order.status]}`
+            background: "#1a1a1a",
+            borderRadius: 12,
+            padding: 12,
+            marginBottom: 10,
           }}
         >
-          <strong>{order.customer_name}</strong>{' '}
-          <span style={{ color: STATUS_COLORS[order.status] }}>
-            ● {order.status}
+          <strong>{order.customer_name}</strong>{" "}
+          <span style={{ color: "#d4af37" }}>
+            € {Number(order.total).toFixed(2)}
           </span>
 
-          <p style={{ fontSize: '0.85rem' }}>
-            {order.customer_phone}
-          </p>
-
-          <ul style={{ marginTop: 6 }}>
-            {order.order_items.map((i, idx) => (
-              <li key={idx}>
-                {i.products?.name} × {i.quantity}
-              </li>
-            ))}
-          </ul>
-
-          <p style={{ marginTop: 6 }}>
-            <strong>Totale:</strong> € {order.total.toFixed(2)}
-          </p>
+          <div style={{ fontSize: 12, color: "#aaa" }}>
+            {order.customer_phone} · {order.status}
+          </div>
 
           {order.note && (
-            <p style={{ fontStyle: 'italic', color: '#ccc' }}>
-              Note: {order.note}
-            </p>
+            <div style={{ fontStyle: "italic", marginTop: 4 }}>
+              “{order.note}”
+            </div>
           )}
 
-          {/* AZIONI */}
-          <div style={{ marginTop: 10 }}>
-            {order.status === 'nuovo' && (
-              <button
-                disabled={updatingId === order.id}
-                onClick={() => markAsGestito(order)}
-                style={{
-                  marginRight: 6,
-                  background: '#4caf50',
-                  color: '#000',
-                  border: 'none',
-                  borderRadius: 8,
-                  padding: '0.35rem 0.6rem',
-                  fontSize: '0.75rem',
-                  fontWeight: 600,
-                  opacity: updatingId === order.id ? 0.6 : 1
-                }}
-              >
-                Gestito
-              </button>
-            )}
-
-            {order.status !== 'consegnato' && (
-              <button
-                disabled={updatingId === order.id}
-                onClick={() => markAsCompleto(order)}
-                style={{
-                  background: '#2196f3',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: 8,
-                  padding: '0.35rem 0.6rem',
-                  fontSize: '0.75rem',
-                  fontWeight: 600,
-                  opacity: updatingId === order.id ? 0.6 : 1
-                }}
-              >
-                Completa
-              </button>
-            )}
+          <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+            <button onClick={() => openEdit(order)}>✏️ Modifica</button>
+            <button onClick={() => cancelOrder(order.id)}>🗑️ Annulla</button>
           </div>
         </div>
       ))}
+
+      {/* MODALE EDIT */}
+      {editing && (
+        <div className="checkout-overlay">
+          <div className="checkout-panel">
+            <h3>Modifica ordine</h3>
+
+            <input
+              placeholder="Nome"
+              value={name}
+              onChange={e => setName(e.target.value)}
+            />
+            <input
+              placeholder="Telefono"
+              value={phone}
+              onChange={e => setPhone(e.target.value)}
+            />
+            <textarea
+              placeholder="Note"
+              value={note}
+              onChange={e => setNote(e.target.value)}
+            />
+
+            <button onClick={saveEdit}>Salva</button>
+            <button onClick={() => setEditing(null)}>Chiudi</button>
+          </div>
+        </div>
+      )}
+
+      {/* MODALE CREA */}
+      {creating && (
+        <div className="checkout-overlay">
+          <div className="checkout-panel">
+            <h3>Nuovo ordine manuale</h3>
+
+            <input
+              placeholder="Nome"
+              value={name}
+              onChange={e => setName(e.target.value)}
+            />
+            <input
+              placeholder="Telefono"
+              value={phone}
+              onChange={e => setPhone(e.target.value)}
+            />
+            <textarea
+              placeholder="Note"
+              value={note}
+              onChange={e => setNote(e.target.value)}
+            />
+
+            <button onClick={createOrder}>Crea ordine</button>
+            <button onClick={() => setCreating(false)}>Chiudi</button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
