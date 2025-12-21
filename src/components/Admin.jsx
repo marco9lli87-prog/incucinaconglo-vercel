@@ -38,7 +38,7 @@ export default function Admin() {
   }
 
   /* =========================
-     CRUD ORDINI
+     EDIT / CREATE
      ========================= */
 
   const openEdit = (order) => {
@@ -94,20 +94,25 @@ export default function Admin() {
     loadOrders()
   }
 
-  /* ========================= */
-
   const visibleOrders = onlyNew
     ? orders.filter(o => o.status === STATUS.NUOVO)
     : orders
+
+  /* ========================= */
 
   return (
     <div style={{ padding: 16, maxWidth: 720, margin: "0 auto", color: "#fff" }}>
       <h1 style={{ color: "#d4af37" }}>Admin Ordini</h1>
 
-      <div style={{ display: "flex", gap: 10, marginBottom: 12 }}>
-        <button onClick={() => setCreating(true)}>+ Nuovo ordine</button>
+      <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
+        <button
+          onClick={() => setCreating(true)}
+          style={{ background: "#d4af37", border: 0, padding: "6px 10px" }}
+        >
+          + Nuovo ordine
+        </button>
 
-        <label>
+        <label style={{ fontSize: 14 }}>
           <input
             type="checkbox"
             checked={onlyNew}
@@ -151,61 +156,80 @@ export default function Admin() {
         </div>
       ))}
 
-      {/* MODALE EDIT */}
-      {editing && (
-        <div className="checkout-overlay">
-          <div className="checkout-panel">
-            <h3>Modifica ordine</h3>
+      {/* MODALE */}
+      {(editing || creating) && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.6)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 1000,
+          }}
+        >
+          <div
+            style={{
+              background: "#1a1a1a",
+              padding: 16,
+              borderRadius: 12,
+              width: "90%",
+              maxWidth: 420,
+            }}
+          >
+            <h3 style={{ color: "#d4af37" }}>
+              {editing ? "Modifica ordine" : "Nuovo ordine manuale"}
+            </h3>
 
             <input
-              placeholder="Nome"
+              style={inputStyle}
+              placeholder="Nome cliente"
               value={name}
               onChange={e => setName(e.target.value)}
             />
             <input
+              style={inputStyle}
               placeholder="Telefono"
               value={phone}
               onChange={e => setPhone(e.target.value)}
             />
             <textarea
+              style={{ ...inputStyle, minHeight: 80 }}
               placeholder="Note"
               value={note}
               onChange={e => setNote(e.target.value)}
             />
 
-            <button onClick={saveEdit}>Salva</button>
-            <button onClick={() => setEditing(null)}>Chiudi</button>
-          </div>
-        </div>
-      )}
-
-      {/* MODALE CREA */}
-      {creating && (
-        <div className="checkout-overlay">
-          <div className="checkout-panel">
-            <h3>Nuovo ordine manuale</h3>
-
-            <input
-              placeholder="Nome"
-              value={name}
-              onChange={e => setName(e.target.value)}
-            />
-            <input
-              placeholder="Telefono"
-              value={phone}
-              onChange={e => setPhone(e.target.value)}
-            />
-            <textarea
-              placeholder="Note"
-              value={note}
-              onChange={e => setNote(e.target.value)}
-            />
-
-            <button onClick={createOrder}>Crea ordine</button>
-            <button onClick={() => setCreating(false)}>Chiudi</button>
+            <div style={{ display: "flex", gap: 10, marginTop: 12 }}>
+              <button
+                onClick={editing ? saveEdit : createOrder}
+                style={{ background: "#4caf50", border: 0, padding: "6px 10px" }}
+              >
+                Salva
+              </button>
+              <button
+                onClick={() => {
+                  setEditing(null)
+                  setCreating(false)
+                }}
+              >
+                Chiudi
+              </button>
+            </div>
           </div>
         </div>
       )}
     </div>
   )
+}
+
+const inputStyle = {
+  width: "100%",
+  marginTop: 8,
+  padding: 8,
+  borderRadius: 6,
+  border: "1px solid #333",
+  background: "#0f0f0f",
+  color: "#fff",
 }
