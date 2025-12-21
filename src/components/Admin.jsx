@@ -13,11 +13,9 @@ export default function Admin() {
   const [loading, setLoading] = useState(true)
   const [onlyNew, setOnlyNew] = useState(false)
 
-  // modali
   const [editing, setEditing] = useState(null)
   const [creating, setCreating] = useState(false)
 
-  // form
   const [name, setName] = useState("")
   const [phone, setPhone] = useState("")
   const [note, setNote] = useState("")
@@ -38,7 +36,19 @@ export default function Admin() {
   }
 
   /* =========================
-     EDIT / CREATE
+     HELPERS
+     ========================= */
+
+  const resetForm = () => {
+    setName("")
+    setPhone("")
+    setNote("")
+    setEditing(null)
+    setCreating(false)
+  }
+
+  /* =========================
+     CRUD
      ========================= */
 
   const openEdit = (order) => {
@@ -58,18 +68,7 @@ export default function Admin() {
       })
       .eq("id", editing.id)
 
-    setEditing(null)
-    loadOrders()
-  }
-
-  const cancelOrder = async (orderId) => {
-    if (!confirm("Annullare questo ordine?")) return
-
-    await supabase
-      .from("orders")
-      .update({ status: STATUS.ANNULLATO })
-      .eq("id", orderId)
-
+    resetForm()
     loadOrders()
   }
 
@@ -87,10 +86,18 @@ export default function Admin() {
       status: STATUS.GESTITO,
     })
 
-    setCreating(false)
-    setName("")
-    setPhone("")
-    setNote("")
+    resetForm()
+    loadOrders()
+  }
+
+  const cancelOrder = async (id) => {
+    if (!confirm("Annullare questo ordine?")) return
+
+    await supabase
+      .from("orders")
+      .update({ status: STATUS.ANNULLATO })
+      .eq("id", id)
+
     loadOrders()
   }
 
@@ -98,18 +105,18 @@ export default function Admin() {
     ? orders.filter(o => o.status === STATUS.NUOVO)
     : orders
 
-  /* ========================= */
+  /* =========================
+     RENDER
+     ========================= */
 
   return (
-    <div style={{ padding: 16, maxWidth: 720, margin: "0 auto", color: "#fff" }}>
-      <h1 style={{ color: "#d4af37" }}>Admin Ordini</h1>
+    <div style={page}>
+      <h1 style={title}>Admin ordini</h1>
 
-      <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
-        <button
-          onClick={() => setCreating(true)}
-          style={{ background: "#d4af37", border: 0, padding: "6px 10px" }}
-        >
-          + Nuovo ordine
+      {/* TOP BAR */}
+      <div style={topBar}>
+        <button style={btnPrimary} onClick={() => setCreating(true)}>
+          ➕ Nuovo ordine
         </button>
 
         <label style={{ fontSize: 14 }}>
@@ -124,96 +131,68 @@ export default function Admin() {
 
       {loading && <p>Caricamento…</p>}
 
+      {/* LISTA */}
       {visibleOrders.map(order => (
-        <div
-          key={order.id}
-          style={{
-            background: "#1a1a1a",
-            borderRadius: 12,
-            padding: 12,
-            marginBottom: 10,
-          }}
-        >
-          <strong>{order.customer_name}</strong>{" "}
-          <span style={{ color: "#d4af37" }}>
-            € {Number(order.total).toFixed(2)}
-          </span>
+        <div key={order.id} style={card}>
+          <div>
+            <strong>{order.customer_name}</strong>{" "}
+            <span style={{ color: "#d4af37" }}>
+              € {Number(order.total).toFixed(2)}
+            </span>
+          </div>
 
-          <div style={{ fontSize: 12, color: "#aaa" }}>
+          <div style={meta}>
             {order.customer_phone} · {order.status}
           </div>
 
-          {order.note && (
-            <div style={{ fontStyle: "italic", marginTop: 4 }}>
-              “{order.note}”
-            </div>
-          )}
+          {order.note && <div style={noteStyle}>“{order.note}”</div>}
 
-          <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
-            <button onClick={() => openEdit(order)}>✏️ Modifica</button>
-            <button onClick={() => cancelOrder(order.id)}>🗑️ Annulla</button>
+          <div style={actions}>
+            <button style={btnEdit} onClick={() => openEdit(order)}>
+              ✏️ Modifica
+            </button>
+            <button style={btnDanger} onClick={() => cancelOrder(order.id)}>
+              🗑️ Annulla
+            </button>
           </div>
         </div>
       ))}
 
       {/* MODALE */}
       {(editing || creating) && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(0,0,0,0.6)",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            zIndex: 1000,
-          }}
-        >
-          <div
-            style={{
-              background: "#1a1a1a",
-              padding: 16,
-              borderRadius: 12,
-              width: "90%",
-              maxWidth: 420,
-            }}
-          >
+        <div style={overlay}>
+          <div style={modal}>
             <h3 style={{ color: "#d4af37" }}>
               {editing ? "Modifica ordine" : "Nuovo ordine manuale"}
             </h3>
 
             <input
-              style={inputStyle}
+              style={input}
               placeholder="Nome cliente"
               value={name}
               onChange={e => setName(e.target.value)}
             />
             <input
-              style={inputStyle}
+              style={input}
               placeholder="Telefono"
               value={phone}
               onChange={e => setPhone(e.target.value)}
             />
             <textarea
-              style={{ ...inputStyle, minHeight: 80 }}
+              style={{ ...input, minHeight: 80 }}
               placeholder="Note"
               value={note}
               onChange={e => setNote(e.target.value)}
             />
 
-            <div style={{ display: "flex", gap: 10, marginTop: 12 }}>
+            <div style={{ display: "flex", gap: 10, marginTop: 14 }}>
               <button
+                style={btnPrimary}
                 onClick={editing ? saveEdit : createOrder}
-                style={{ background: "#4caf50", border: 0, padding: "6px 10px" }}
               >
                 Salva
               </button>
-              <button
-                onClick={() => {
-                  setEditing(null)
-                  setCreating(false)
-                }}
-              >
+              <button style={btnSecondary} onClick={resetForm}>
                 Chiudi
               </button>
             </div>
@@ -224,7 +203,105 @@ export default function Admin() {
   )
 }
 
-const inputStyle = {
+/* =========================
+   STYLES (INLINE, A PROVA DI CSS GLOBALI)
+   ========================= */
+
+const page = {
+  padding: 16,
+  maxWidth: 720,
+  margin: "0 auto",
+  color: "#fff",
+}
+
+const title = {
+  color: "#d4af37",
+  marginBottom: 12,
+}
+
+const topBar = {
+  display: "flex",
+  gap: 12,
+  alignItems: "center",
+  marginBottom: 16,
+}
+
+const card = {
+  background: "#1a1a1a",
+  borderRadius: 12,
+  padding: 12,
+  marginBottom: 10,
+}
+
+const meta = {
+  fontSize: 12,
+  color: "#aaa",
+}
+
+const noteStyle = {
+  marginTop: 6,
+  fontStyle: "italic",
+  color: "#ccc",
+}
+
+const actions = {
+  display: "flex",
+  gap: 8,
+  marginTop: 10,
+}
+
+const btnPrimary = {
+  background: "#d4af37",
+  color: "#000",
+  border: "none",
+  borderRadius: 8,
+  padding: "6px 12px",
+  fontWeight: 700,
+}
+
+const btnEdit = {
+  background: "#4caf50",
+  color: "#000",
+  border: "none",
+  borderRadius: 8,
+  padding: "6px 10px",
+}
+
+const btnDanger = {
+  background: "#c62828",
+  color: "#fff",
+  border: "none",
+  borderRadius: 8,
+  padding: "6px 10px",
+}
+
+const btnSecondary = {
+  background: "#333",
+  color: "#fff",
+  border: "none",
+  borderRadius: 8,
+  padding: "6px 10px",
+}
+
+const overlay = {
+  position: "fixed",
+  inset: 0,
+  background: "rgba(0,0,0,0.7)",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  zIndex: 999,
+}
+
+const modal = {
+  background: "#1a1a1a",
+  borderRadius: 12,
+  padding: 16,
+  width: "90%",
+  maxWidth: 420,
+}
+
+const input = {
   width: "100%",
   marginTop: 8,
   padding: 8,
