@@ -10,17 +10,20 @@ const STATUS_LABELS = {
 
 export default function AdminOrders() {
   const [orders, setOrders] = useState([])
+  const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState("tutti")
+  const [editingOrderId, setEditingOrderId] = useState(null)
+  const [editItems, setEditItems] = useState([])
 
   useEffect(() => {
-    loadOrders()
+    loadAll()
   }, [])
 
-  const loadOrders = async () => {
+  const loadAll = async () => {
     setLoading(true)
 
-    const { data } = await supabase
+    const { data: ordersData } = await supabase
       .from("orders")
       .select(`
         id,
@@ -33,22 +36,107 @@ export default function AdminOrders() {
         order_items (
           id,
           quantity,
-          products ( name )
+          products ( id, name, price )
         )
       `)
       .order("created_at", { ascending: false })
 
-    setOrders(data || [])
+    const { data: productsData } = await supabase
+      .from("products")
+      .select("id, name, price")
+      .eq("active", true)
+
+    setOrders(ordersData || [])
+    setProducts(productsData || [])
     setLoading(false)
   }
 
   const updateStatus = async (orderId, status) => {
+    await supabase.from("orders").update({ status }).eq("id", orderId)
+    loadAll()
+  }
+
+  const startEdit = (order) => {
+    setEditingOrderId(order.id)
+    setEditItems(
+      order.order_items.map(i => ({
+        order_item_id: i.id,
+        product_id: i.products.id,
+        name: i.products.name,
+        price: i.products.price,
+        quantity: i.quantity,
+      }))
+    )
+  }
+
+  const stopEdit = () => {
+    setEditingOrderId(null)
+    setEditItems([])
+  }
+
+  const changeQty = (index, delta) => {
+    setEditItems(items =>
+      items.map((item, i) =>
+        i === index
+          ? { ...item, quantity: Math.max(1, item.quantity + delta) }
+          : item
+      )
+    )
+  }
+
+  const removeItem = (index) => {
+    setEditItems(items => items.filter((_, i) => i !== index))
+  }
+
+  const addProduct = (productId) => {
+    const product = products.find(p => p.id === productId)
+    if (!product) return
+
+    setEditItems(items => {
+      const existing = items.find(i => i.product_id === product.id)
+      if (existing) {
+        return items.map(i =>
+          i.product_id === product.id
+            ? { ...i, quantity: i.quantity + 1 }
+            : i
+        )
+      }
+      return [
+        ...items,
+        {
+          order_item_id: null,
+          product_id: product.id,
+          name: product.name,
+          price: product.price,
+          quantity: 1,
+        },
+      ]
+    })
+  }
+
+  const saveEdit = async (orderId) => {
+    await supabase.from("order_items").delete().eq("order_id", orderId)
+
+    const newItems = editItems.map(item => ({
+      order_id: orderId,
+      product_id: item.product_id,
+      quantity: item.quantity,
+    }))
+
+    await supabase.from("order_items").insert(newItems)
+
+    const newTotal = editItems.reduce(
+      (sum, i) => sum + i.price * i.quantity,
+      0
+    )
+
     await supabase
       .from("orders")
-      .update({ status })
+      .update({ total: newTotal })
       .eq("id", orderId)
 
-    loadOrders()
+    stopEdit()
+    loadAll()
   }
 
   const whatsappLink = (order) => {
@@ -82,7 +170,6 @@ Glò`
     <div style={page}>
       <h1 style={title}>Ordini</h1>
 
-      {/* FILTRO */}
       <div style={filters}>
         {["tutti", "nuovo", "gestito", "completato"].map(f => (
           <button
@@ -123,7 +210,7 @@ Glò`
           <ul style={items}>
             {order.order_items.map(item => (
               <li key={item.id}>
-                {item.products?.name} x {item.quantity}
+                {item.products.name} x {item.quantity}
               </li>
             ))}
           </ul>
@@ -156,7 +243,69 @@ Glò`
             >
               Completato
             </button>
+
+            <button
+              style={btnSmall}
+              onClick={() =>
+                editingOrderId === order.id
+                  ? stopEdit()
+                  : startEdit(order)
+              }
+            >
+              {editingOrderId === order.id ? "Chiudi" : "Modifica"}
+            </button>
           </div>
+
+          {editingOrderId === order.id && (
+            <div style={editPanel}>
+              {editItems.map((item, index) => (
+                <div key={index} style={editRow}>
+                  <span>{item.name}</span>
+                  <div>
+                    <button
+                      style={qtyBtn}
+                      onClick={() => changeQty(index, -1)}
+                    >
+                      -
+                    </button>
+                    <span style={qty}>{item.quantity}</span>
+                    <button
+                      style={qtyBtn}
+                      onClick={() => changeQty(index, 1)}
+                    >
+                      +
+                    </button>
+                    <button
+                      style={removeBtn}
+                      onClick={() => removeItem(index)}
+                    >
+                      Rimuovi
+                    </button>
+                  </div>
+                </div>
+              ))}
+
+              <select
+                style={select}
+                onChange={e => addProduct(e.target.value)}
+                defaultValue=""
+              >
+                <option value="">Aggiungi prodotto</option>
+                {products.map(p => (
+                  <option key={p.id} value={p.id}>
+                    {p.name}
+                  </option>
+                ))}
+              </select>
+
+              <button
+                style={saveBtn}
+                onClick={() => saveEdit(order.id)}
+              >
+                Salva modifiche
+              </button>
+            </div>
+          )}
         </div>
       ))}
     </div>
@@ -165,92 +314,26 @@ Glò`
 
 /* ================= STILI ================= */
 
-const page = {
-  padding: 16,
-  color: "#fff",
-}
-
-const title = {
-  color: "#d4af37",
-  marginBottom: 12,
-}
-
-const filters = {
-  display: "flex",
-  gap: 6,
-  marginBottom: 14,
-  flexWrap: "wrap",
-}
-
-const filterBtn = {
-  border: "none",
-  borderRadius: 6,
-  padding: "4px 8px",
-  fontSize: 13,
-}
-
-const card = {
-  background: "#1a1a1a",
-  padding: 12,
-  borderRadius: 8,
-  marginBottom: 12,
-}
-
-const rowBetween = {
-  display: "flex",
-  justifyContent: "space-between",
-  marginBottom: 4,
-}
-
-const date = {
-  fontSize: 12,
-  opacity: 0.7,
-}
-
-const meta = {
-  fontSize: 13,
-  opacity: 0.85,
-  marginBottom: 6,
-}
-
-const note = {
-  fontSize: 13,
-  opacity: 0.8,
-  marginBottom: 6,
-}
-
-const items = {
-  fontSize: 14,
-  marginBottom: 6,
-  paddingLeft: 16,
-}
-
-const actions = {
-  display: "flex",
-  gap: 6,
-  marginTop: 8,
-  flexWrap: "wrap",
-}
-
-const btnSmall = {
-  background: "#2a2a2a",
-  color: "#fff",
-  border: "none",
-  padding: "4px 8px",
-  borderRadius: 6,
-  fontSize: 12,
-}
-
-const btnWhatsapp = {
-  background: "#16a34a",
-  color: "#fff",
-  padding: "4px 8px",
-  borderRadius: 6,
-  fontSize: 12,
-  textDecoration: "none",
-}
-
-/* ===== UTILS ===== */
+const page = { padding: 16, color: "#fff" }
+const title = { color: "#d4af37", marginBottom: 12 }
+const filters = { display: "flex", gap: 6, marginBottom: 14 }
+const filterBtn = { border: "none", borderRadius: 6, padding: "4px 8px" }
+const card = { background: "#1a1a1a", padding: 12, borderRadius: 8, marginBottom: 12 }
+const rowBetween = { display: "flex", justifyContent: "space-between", marginBottom: 4 }
+const date = { fontSize: 12, opacity: 0.7 }
+const meta = { fontSize: 13, opacity: 0.85, marginBottom: 6 }
+const note = { fontSize: 13, opacity: 0.8, marginBottom: 6 }
+const items = { fontSize: 14, marginBottom: 6, paddingLeft: 16 }
+const actions = { display: "flex", gap: 6, marginTop: 8, flexWrap: "wrap" }
+const btnSmall = { background: "#2a2a2a", color: "#fff", border: "none", padding: "4px 8px", borderRadius: 6, fontSize: 12 }
+const btnWhatsapp = { background: "#16a34a", color: "#fff", padding: "4px 8px", borderRadius: 6, fontSize: 12, textDecoration: "none" }
+const editPanel = { marginTop: 10, paddingTop: 10, borderTop: "1px solid #333" }
+const editRow = { display: "flex", justifyContent: "space-between", marginBottom: 6 }
+const qtyBtn = { background: "#333", color: "#fff", border: "none", padding: "2px 6px", marginRight: 4 }
+const qty = { marginRight: 4 }
+const removeBtn = { background: "#b91c1c", color: "#fff", border: "none", padding: "2px 6px", marginLeft: 4 }
+const select = { width: "100%", marginTop: 8, padding: 6 }
+const saveBtn = { marginTop: 10, padding: 8, background: "#d4af37", color: "#000", border: "none", width: "100%" }
 
 const statusColor = (status) => {
   if (status === "gestito") return "#facc15"
