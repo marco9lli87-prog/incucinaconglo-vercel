@@ -1,59 +1,31 @@
-import { useState } from 'react'
-import Home from './Home'
-import Checkout from './components/Checkout'
-import Admin from './components/Admin'
+import { BrowserRouter, Routes, Route } from "react-router-dom"
+import Home from "./Home"
+import AdminDashboard from "./pages/AdminDashboard"
+
+/* Placeholder temporanei */
+function AdminOrders() {
+  return <div style={{ color: "#fff", padding: 24 }}>Admin ordini</div>
+}
+
+function AdminNewOrder() {
+  return <div style={{ color: "#fff", padding: 24 }}>Nuovo ordine</div>
+}
+
+function AdminProducts() {
+  return <div style={{ color: "#fff", padding: 24 }}>Admin prodotti</div>
+}
 
 export default function App() {
-  const [cart, setCart] = useState([])
-  const [showCheckout, setShowCheckout] = useState(false)
-
-  const addToCart = product => {
-    setCart(prev => {
-      const found = prev.find(p => p.id === product.id)
-      if (found) {
-        return prev.map(p =>
-          p.id === product.id
-            ? { ...p, qty: p.qty + 1 }
-            : p
-        )
-      }
-      return [...prev, { ...product, qty: 1 }]
-    })
-  }
-
-  const clearCart = () => setCart([])
-
-  const totalItems = cart.reduce(
-    (sum, i) => sum + i.qty,
-    0
-  )
-
-  // routing semplice senza librerie
-  if (window.location.pathname === '/admin') {
-    return <Admin />
-  }
-
   return (
-    <>
-      <Home onAdd={addToCart} />
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Home />} />
 
-      {cart.length > 0 && (
-        <button
-          className="cart-button"
-          onClick={() => setShowCheckout(true)}
-        >
-          Carrello · {totalItems}
-        </button>
-      )}
-
-      {showCheckout && (
-        <Checkout
-          cart={cart}
-          setCart={setCart}
-          onClose={() => setShowCheckout(false)}
-          onClear={clearCart}
-        />
-      )}
-    </>
+        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/admin/orders" element={<AdminOrders />} />
+        <Route path="/admin/orders/new" element={<AdminNewOrder />} />
+        <Route path="/admin/products" element={<AdminProducts />} />
+      </Routes>
+    </BrowserRouter>
   )
 }
