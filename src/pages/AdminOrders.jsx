@@ -51,16 +51,35 @@ export default function AdminOrders() {
     setLoading(false)
   }
 
+  /* ======================
+     STATUS / FILTRI
+     ====================== */
+
   const updateStatus = async (orderId, status) => {
     await supabase.from("orders").update({ status }).eq("id", orderId)
     loadAll()
   }
 
+  const filteredOrders =
+    filter === "tutti"
+      ? orders
+      : orders.filter(o => o.status === filter)
+
+  const orderedOrders = [
+    ...filteredOrders.filter(o => o.status === "nuovo"),
+    ...filteredOrders.filter(o => o.status !== "nuovo"),
+  ]
+
+  const newCount = orders.filter(o => o.status === "nuovo").length
+
+  /* ======================
+     MODIFICA ORDINE
+     ====================== */
+
   const startEdit = (order) => {
     setEditingOrderId(order.id)
     setEditItems(
       order.order_items.map(i => ({
-        order_item_id: i.id,
         product_id: i.products.id,
         name: i.products.name,
         price: i.products.price,
@@ -104,7 +123,6 @@ export default function AdminOrders() {
       return [
         ...items,
         {
-          order_item_id: null,
           product_id: product.id,
           name: product.name,
           price: product.price,
@@ -117,27 +135,28 @@ export default function AdminOrders() {
   const saveEdit = async (orderId) => {
     await supabase.from("order_items").delete().eq("order_id", orderId)
 
-    const newItems = editItems.map(item => ({
-      order_id: orderId,
-      product_id: item.product_id,
-      quantity: item.quantity,
-    }))
-
-    await supabase.from("order_items").insert(newItems)
+    await supabase.from("order_items").insert(
+      editItems.map(i => ({
+        order_id: orderId,
+        product_id: i.product_id,
+        quantity: i.quantity,
+      }))
+    )
 
     const newTotal = editItems.reduce(
       (sum, i) => sum + i.price * i.quantity,
       0
     )
 
-    await supabase
-      .from("orders")
-      .update({ total: newTotal })
-      .eq("id", orderId)
+    await supabase.from("orders").update({ total: newTotal }).eq("id", orderId)
 
     stopEdit()
     loadAll()
   }
+
+  /* ======================
+     WHATSAPP
+     ====================== */
 
   const whatsappLink = (order) => {
     if (!order.customer_phone) return "#"
@@ -157,18 +176,18 @@ Glò`
     )
   }
 
-  const filteredOrders =
-    filter === "tutti"
-      ? orders
-      : orders.filter(o => o.status === filter)
-
   if (loading) {
     return <div style={page}>Caricamento ordini...</div>
   }
 
   return (
     <div style={page}>
-      <h1 style={title}>Ordini</h1>
+      <div style={titleRow}>
+        <h1 style={title}>Ordini</h1>
+        {newCount > 0 && (
+          <span style={badge}>{newCount} nuovi</span>
+        )}
+      </div>
 
       <div style={filters}>
         {["tutti", "nuovo", "gestito", "completato"].map(f => (
@@ -186,7 +205,7 @@ Glò`
         ))}
       </div>
 
-      {filteredOrders.map(order => (
+      {orderedOrders.map(order => (
         <div
           key={order.id}
           style={{
@@ -262,46 +281,22 @@ Glò`
                 <div key={index} style={editRow}>
                   <span>{item.name}</span>
                   <div>
-                    <button
-                      style={qtyBtn}
-                      onClick={() => changeQty(index, -1)}
-                    >
-                      -
-                    </button>
+                    <button style={qtyBtn} onClick={() => changeQty(index, -1)}>-</button>
                     <span style={qty}>{item.quantity}</span>
-                    <button
-                      style={qtyBtn}
-                      onClick={() => changeQty(index, 1)}
-                    >
-                      +
-                    </button>
-                    <button
-                      style={removeBtn}
-                      onClick={() => removeItem(index)}
-                    >
-                      Rimuovi
-                    </button>
+                    <button style={qtyBtn} onClick={() => changeQty(index, 1)}>+</button>
+                    <button style={removeBtn} onClick={() => removeItem(index)}>Rimuovi</button>
                   </div>
                 </div>
               ))}
 
-              <select
-                style={select}
-                onChange={e => addProduct(e.target.value)}
-                defaultValue=""
-              >
+              <select style={select} onChange={e => addProduct(e.target.value)} defaultValue="">
                 <option value="">Aggiungi prodotto</option>
                 {products.map(p => (
-                  <option key={p.id} value={p.id}>
-                    {p.name}
-                  </option>
+                  <option key={p.id} value={p.id}>{p.name}</option>
                 ))}
               </select>
 
-              <button
-                style={saveBtn}
-                onClick={() => saveEdit(order.id)}
-              >
+              <button style={saveBtn} onClick={() => saveEdit(order.id)}>
                 Salva modifiche
               </button>
             </div>
@@ -315,8 +310,10 @@ Glò`
 /* ================= STILI ================= */
 
 const page = { padding: 16, color: "#fff" }
-const title = { color: "#d4af37", marginBottom: 12 }
-const filters = { display: "flex", gap: 6, marginBottom: 14 }
+const titleRow = { display: "flex", alignItems: "center", gap: 10 }
+const title = { color: "#d4af37" }
+const badge = { background: "#facc15", color: "#000", padding: "4px 8px", borderRadius: 12, fontSize: 12 }
+const filters = { display: "flex", gap: 6, margin: "12px 0" }
 const filterBtn = { border: "none", borderRadius: 6, padding: "4px 8px" }
 const card = { background: "#1a1a1a", padding: 12, borderRadius: 8, marginBottom: 12 }
 const rowBetween = { display: "flex", justifyContent: "space-between", marginBottom: 4 }
