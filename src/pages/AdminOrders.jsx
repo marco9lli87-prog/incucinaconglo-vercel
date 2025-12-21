@@ -1,9 +1,17 @@
 import { useEffect, useState } from "react"
 import { supabase } from "../lib/supabase"
 
+const STATUS_LABELS = {
+  nuovo: "Nuovo",
+  gestito: "In gestione",
+  completato: "Completato",
+  annullato: "Annullato",
+}
+
 export default function AdminOrders() {
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
+  const [filter, setFilter] = useState("tutti")
 
   useEffect(() => {
     loadOrders()
@@ -12,7 +20,7 @@ export default function AdminOrders() {
   const loadOrders = async () => {
     setLoading(true)
 
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from("orders")
       .select(`
         id,
@@ -25,17 +33,12 @@ export default function AdminOrders() {
         order_items (
           id,
           quantity,
-          products (
-            name
-          )
+          products ( name )
         )
       `)
       .order("created_at", { ascending: false })
 
-    if (!error) {
-      setOrders(data || [])
-    }
-
+    setOrders(data || [])
     setLoading(false)
   }
 
@@ -66,6 +69,11 @@ Glò`
     )
   }
 
+  const filteredOrders =
+    filter === "tutti"
+      ? orders
+      : orders.filter(o => o.status === filter)
+
   if (loading) {
     return <div style={page}>Caricamento ordini...</div>
   }
@@ -74,17 +82,40 @@ Glò`
     <div style={page}>
       <h1 style={title}>Ordini</h1>
 
-      {orders.length === 0 && <p>Nessun ordine</p>}
+      {/* FILTRO */}
+      <div style={filters}>
+        {["tutti", "nuovo", "gestito", "completato"].map(f => (
+          <button
+            key={f}
+            style={{
+              ...filterBtn,
+              background: filter === f ? "#d4af37" : "#333",
+              color: filter === f ? "#000" : "#fff",
+            }}
+            onClick={() => setFilter(f)}
+          >
+            {f === "tutti" ? "Tutti" : STATUS_LABELS[f]}
+          </button>
+        ))}
+      </div>
 
-      {orders.map(order => (
+      {filteredOrders.length === 0 && <p>Nessun ordine</p>}
+
+      {filteredOrders.map(order => (
         <div key={order.id} style={card}>
           <div style={rowBetween}>
             <strong>{order.customer_name}</strong>
             <span>{new Date(order.created_at).toLocaleString()}</span>
           </div>
 
-          <div>Telefono: {order.customer_phone}</div>
-          {order.note && <div>Note: {order.note}</div>}
+          <div style={rowBetween}>
+            <span>📞 {order.customer_phone}</span>
+            <span style={statusBadge(order.status)}>
+              {STATUS_LABELS[order.status] || order.status}
+            </span>
+          </div>
+
+          {order.note && <div style={note}>Note: {order.note}</div>}
 
           <ul>
             {order.order_items.map(item => (
@@ -104,20 +135,20 @@ Glò`
               href={whatsappLink(order)}
               target="_blank"
               rel="noopener noreferrer"
-              style={btnBlue}
+              style={btnWhatsapp}
             >
               WhatsApp
             </a>
 
             <button
-              style={btnGray}
+              style={btnYellow}
               onClick={() => updateStatus(order.id, "gestito")}
             >
-              Gestito
+              In gestione
             </button>
 
             <button
-              style={btnGreen}
+              style={btnBlue}
               onClick={() => updateStatus(order.id, "completato")}
             >
               Completato
@@ -129,7 +160,7 @@ Glò`
   )
 }
 
-/* ===== STILI SAFE ===== */
+/* ================= STILI ================= */
 
 const page = {
   padding: 16,
@@ -138,7 +169,20 @@ const page = {
 
 const title = {
   color: "#d4af37",
+  marginBottom: 12,
+}
+
+const filters = {
+  display: "flex",
+  gap: 8,
   marginBottom: 16,
+  flexWrap: "wrap",
+}
+
+const filterBtn = {
+  border: "none",
+  borderRadius: 8,
+  padding: "6px 10px",
 }
 
 const card = {
@@ -152,33 +196,56 @@ const rowBetween = {
   display: "flex",
   justifyContent: "space-between",
   marginBottom: 6,
+  gap: 8,
+}
+
+const note = {
+  fontSize: 13,
+  opacity: 0.8,
+  marginBottom: 6,
 }
 
 const actions = {
   display: "flex",
-  flexWrap: "wrap",
   gap: 8,
   marginTop: 10,
+  flexWrap: "wrap",
 }
 
-const btnBlue = {
-  background: "#2563eb",
+const statusBadge = (status) => ({
+  padding: "4px 8px",
+  borderRadius: 12,
+  fontSize: 12,
+  background:
+    status === "gestito"
+      ? "#facc15"
+      : status === "completato"
+      ? "#3b82f6"
+      : "#555",
+  color:
+    status === "gestito"
+      ? "#000"
+      : "#fff",
+})
+
+const btnWhatsapp = {
+  background: "#16a34a",
   color: "#fff",
   padding: "6px 12px",
   borderRadius: 6,
   textDecoration: "none",
 }
 
-const btnGray = {
-  background: "#444",
-  color: "#fff",
+const btnYellow = {
+  background: "#facc15",
+  color: "#000",
   border: "none",
   padding: "6px 10px",
   borderRadius: 6,
 }
 
-const btnGreen = {
-  background: "#16a34a",
+const btnBlue = {
+  background: "#3b82f6",
   color: "#fff",
   border: "none",
   padding: "6px 10px",
