@@ -6,22 +6,22 @@ export default function AdminOrders() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetchOrders()
+    loadOrders()
   }, [])
 
-  const fetchOrders = async () => {
+  const loadOrders = async () => {
     setLoading(true)
 
     const { data, error } = await supabase
       .from("orders")
       .select(`
         id,
-        created_at,
         customer_name,
         customer_phone,
         note,
         total,
         status,
+        created_at,
         order_items (
           id,
           quantity,
@@ -39,104 +39,88 @@ export default function AdminOrders() {
     setLoading(false)
   }
 
-  const updateStatus = async (orderId, newStatus) => {
+  const updateStatus = async (orderId, status) => {
     await supabase
       .from("orders")
-      .update({ status: newStatus })
+      .update({ status })
       .eq("id", orderId)
 
-    fetchOrders()
+    loadOrders()
   }
 
-  const openWhatsapp = (order) => {
-    if (!order.customer_phone) return
+  const whatsappLink = (order) => {
+    if (!order.customer_phone) return "#"
 
-    const itemsText = order.order_items
-      .map(i => `- ${i.products.name} x${i.quantity}`)
-      .join("\n")
+    const message = `Ciao ${order.customer_name},
 
-    const message =
-      "Ciao " +
-      order.customer_name +
-      ",\n" +
-      "ti scrivo da In Cucina con Glo.\n\n" +
-      "Riepilogo ordine:\n" +
-      itemsText +
-      "\n\nTotale: EUR " +
-      Number(order.total).toFixed(2) +
-      "\n\nA presto."
+ho ricevuto il tuo ordine.
+Ti aggiorno a breve.
 
-    const url =
+Glò`
+
+    return (
       "https://wa.me/" +
-      order.customer_phone +
+      order.customer_phone.replace(/\D/g, "") +
       "?text=" +
       encodeURIComponent(message)
+    )
+  }
 
-    window.open(url, "_blank")
+  if (loading) {
+    return <div style={page}>Caricamento ordini...</div>
   }
 
   return (
     <div style={page}>
       <h1 style={title}>Ordini</h1>
 
-      {loading && <p>Caricamento...</p>}
-
-      {!loading && orders.length === 0 && (
-        <p>Nessun ordine presente.</p>
-      )}
+      {orders.length === 0 && <p>Nessun ordine</p>}
 
       {orders.map(order => (
         <div key={order.id} style={card}>
-          <div style={row}>
+          <div style={rowBetween}>
             <strong>{order.customer_name}</strong>
-            <span style={price}>
-              EUR {Number(order.total).toFixed(2)}
-            </span>
+            <span>{new Date(order.created_at).toLocaleString()}</span>
           </div>
 
-          <div style={meta}>
-            {order.customer_phone} | {order.status}
-          </div>
+          <div>Telefono: {order.customer_phone}</div>
+          {order.note && <div>Note: {order.note}</div>}
 
-          {order.note && (
-            <div style={note}>Note: {order.note}</div>
-          )}
-
-          <div style={items}>
+          <ul>
             {order.order_items.map(item => (
-              <div key={item.id}>
-                {item.products.name} x{item.quantity}
-              </div>
+              <li key={item.id}>
+                {item.products?.name} x {item.quantity}
+              </li>
             ))}
+          </ul>
+
+          <div style={rowBetween}>
+            <strong>Totale</strong>
+            <strong>€ {Number(order.total).toFixed(2)}</strong>
           </div>
 
           <div style={actions}>
-            <button
-              style={btn}
-              onClick={() => openWhatsapp(order)}
+            <a
+              href={whatsappLink(order)}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={btnBlue}
             >
               WhatsApp
-            </button>
+            </a>
 
             <button
-              style={btn}
+              style={btnGray}
               onClick={() => updateStatus(order.id, "gestito")}
             >
               Gestito
             </button>
 
             <button
-              style={btn}
+              style={btnGreen}
               onClick={() => updateStatus(order.id, "completato")}
             >
               Completato
-            </button>
-
-            <button
-              style={btnDanger}
-              onClick={() => updateStatus(order.id, "annullato")}
-            >
-              Annullato
             </button>
           </div>
         </div>
@@ -145,14 +129,10 @@ export default function AdminOrders() {
   )
 }
 
-/* ======================
-   STILI INLINE SAFE
-   ====================== */
+/* ===== STILI SAFE ===== */
 
 const page = {
   padding: 16,
-  maxWidth: 800,
-  margin: "0 auto",
   color: "#fff",
 }
 
@@ -163,56 +143,44 @@ const title = {
 
 const card = {
   background: "#1a1a1a",
-  borderRadius: 12,
   padding: 12,
-  marginBottom: 12,
+  borderRadius: 10,
+  marginBottom: 16,
 }
 
-const row = {
+const rowBetween = {
   display: "flex",
   justifyContent: "space-between",
-  marginBottom: 4,
-}
-
-const price = {
-  color: "#d4af37",
-}
-
-const meta = {
-  fontSize: 12,
-  color: "#aaa",
   marginBottom: 6,
-}
-
-const note = {
-  fontSize: 13,
-  color: "#ccc",
-  marginBottom: 6,
-}
-
-const items = {
-  marginBottom: 8,
-  fontSize: 14,
 }
 
 const actions = {
   display: "flex",
   flexWrap: "wrap",
   gap: 8,
+  marginTop: 10,
 }
 
-const btn = {
-  background: "#333",
+const btnBlue = {
+  background: "#2563eb",
   color: "#fff",
-  border: "none",
-  borderRadius: 8,
-  padding: "6px 10px",
+  padding: "6px 12px",
+  borderRadius: 6,
+  textDecoration: "none",
 }
 
-const btnDanger = {
-  background: "#b00020",
+const btnGray = {
+  background: "#444",
   color: "#fff",
   border: "none",
-  borderRadius: 8,
   padding: "6px 10px",
+  borderRadius: 6,
+}
+
+const btnGreen = {
+  background: "#16a34a",
+  color: "#fff",
+  border: "none",
+  padding: "6px 10px",
+  borderRadius: 6,
 }
