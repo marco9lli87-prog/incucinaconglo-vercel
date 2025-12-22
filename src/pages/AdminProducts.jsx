@@ -46,7 +46,11 @@ export default function AdminProducts() {
   }
 
   const deleteProduct = async (id) => {
-    if (!window.confirm("Eliminare prodotto?")) return
+    const ok = window.confirm(
+      "Vuoi davvero eliminare questo prodotto?\nL’operazione non è reversibile."
+    )
+    if (!ok) return
+
     await supabase.from("products").delete().eq("id", id)
     loadProducts()
   }
@@ -70,12 +74,15 @@ export default function AdminProducts() {
           onChange={e => setName(e.target.value)}
         />
 
-        <input
-          style={input}
-          placeholder="Prezzo"
-          value={price}
-          onChange={e => setPrice(e.target.value)}
-        />
+        <div style={priceRow}>
+          <span style={euro}>€</span>
+          <input
+            style={priceInput}
+            placeholder="Prezzo"
+            value={price}
+            onChange={e => setPrice(e.target.value)}
+          />
+        </div>
 
         <input
           style={input}
@@ -106,18 +113,19 @@ export default function AdminProducts() {
           )}
 
           <div style={rowBetween}>
-            <label>
-              <input
-                type="checkbox"
-                checked={product.active}
-                onChange={() =>
-                  updateProduct(product.id, {
-                    active: !product.active,
-                  })
-                }
-              />{" "}
-              Attivo
-            </label>
+            <span
+              style={{
+                ...statusBadge,
+                background: product.active ? "#16a34a" : "#555",
+              }}
+              onClick={() =>
+                updateProduct(product.id, {
+                  active: !product.active,
+                })
+              }
+            >
+              {product.active ? "Attivo" : "Non attivo"}
+            </span>
 
             <button
               style={btnDanger}
@@ -137,15 +145,18 @@ export default function AdminProducts() {
             }
           />
 
-          <input
-            style={input}
-            value={product.price}
-            onChange={e =>
-              updateProduct(product.id, {
-                price: Number(e.target.value),
-              })
-            }
-          />
+          <div style={priceRow}>
+            <span style={euro}>€</span>
+            <input
+              style={priceInput}
+              value={product.price}
+              onChange={e =>
+                updateProduct(product.id, {
+                  price: Number(e.target.value),
+                })
+              }
+            />
+          </div>
 
           <input
             style={input}
@@ -165,8 +176,15 @@ export default function AdminProducts() {
 
 /* ================= STILI ================= */
 
-const page = { padding: 16, color: "#fff" }
-const title = { color: "#d4af37", marginBottom: 12 }
+const page = {
+  padding: 16,
+  color: "#fff",
+}
+
+const title = {
+  color: "#d4af37",
+  marginBottom: 12,
+}
 
 const card = {
   background: "#1a1a1a",
@@ -180,12 +198,33 @@ const rowBetween = {
   justifyContent: "space-between",
   alignItems: "center",
   marginBottom: 8,
+  gap: 8,
 }
 
 const input = {
   width: "100%",
   padding: 6,
   marginTop: 6,
+  background: "#0f0f0f",
+  color: "#fff",
+  border: "1px solid #333",
+  borderRadius: 4,
+}
+
+const priceRow = {
+  display: "flex",
+  alignItems: "center",
+  gap: 6,
+  marginTop: 6,
+}
+
+const euro = {
+  opacity: 0.8,
+}
+
+const priceInput = {
+  flex: 1,
+  padding: 6,
   background: "#0f0f0f",
   color: "#fff",
   border: "1px solid #333",
@@ -207,6 +246,14 @@ const btnDanger = {
   border: "none",
   padding: "4px 8px",
   borderRadius: 6,
+}
+
+const statusBadge = {
+  padding: "4px 10px",
+  borderRadius: 12,
+  fontSize: 12,
+  color: "#fff",
+  cursor: "pointer",
 }
 
 const image = {
