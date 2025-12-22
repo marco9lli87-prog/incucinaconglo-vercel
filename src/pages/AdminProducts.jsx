@@ -7,7 +7,7 @@ export default function AdminProducts() {
 
   const [name, setName] = useState("")
   const [price, setPrice] = useState("")
-  const [imageUrl, setImageUrl] = useState("")
+  const [uploading, setUploading] = useState(false)
 
   useEffect(() => {
     loadProducts()
@@ -24,20 +24,56 @@ export default function AdminProducts() {
     setLoading(false)
   }
 
+  /* ======================
+     UPLOAD IMMAGINE
+     ====================== */
+
+  const uploadImage = async (file, productId) => {
+    if (!file) return
+    setUploading(true)
+
+    const ext = file.name.split(".").pop()
+    const fileName = `${productId}.${ext}`
+
+    await supabase.storage
+      .from("products")
+      .upload(fileName, file, { upsert: true })
+
+    const { data } = supabase.storage
+      .from("products")
+      .getPublicUrl(fileName)
+
+    await supabase
+      .from("products")
+      .update({ image_url: data.publicUrl })
+      .eq("id", productId)
+
+    setUploading(false)
+    loadProducts()
+  }
+
+  /* ======================
+     CRUD PRODOTTI
+     ====================== */
+
   const addProduct = async () => {
     if (!name || !price) return
 
-    await supabase.from("products").insert({
-      name,
-      price: Number(price),
-      image_url: imageUrl || null,
-      active: true,
-    })
+    const { data } = await supabase
+      .from("products")
+      .insert({
+        name,
+        price: Number(price),
+        active: true,
+      })
+      .select()
+      .single()
 
     setName("")
     setPrice("")
-    setImageUrl("")
     loadProducts()
+
+    return data
   }
 
   const updateProduct = async (id, fields) => {
@@ -83,13 +119,6 @@ export default function AdminProducts() {
             onChange={e => setPrice(e.target.value)}
           />
         </div>
-
-        <input
-          style={input}
-          placeholder="Image URL (facoltativo)"
-          value={imageUrl}
-          onChange={e => setImageUrl(e.target.value)}
-        />
 
         <button style={btnPrimary} onClick={addProduct}>
           Aggiungi
@@ -159,15 +188,15 @@ export default function AdminProducts() {
           </div>
 
           <input
-            style={input}
-            value={product.image_url || ""}
-            placeholder="Image URL"
+            type="file"
+            accept="image/*"
+            style={fileInput}
             onChange={e =>
-              updateProduct(product.id, {
-                image_url: e.target.value,
-              })
+              uploadImage(e.target.files[0], product.id)
             }
           />
+
+          {uploading && <div style={uploadingText}>Upload in corso…</div>}
         </div>
       ))}
     </div>
@@ -176,15 +205,8 @@ export default function AdminProducts() {
 
 /* ================= STILI ================= */
 
-const page = {
-  padding: 16,
-  color: "#fff",
-}
-
-const title = {
-  color: "#d4af37",
-  marginBottom: 12,
-}
+const page = { padding: 16, color: "#fff" }
+const title = { color: "#d4af37", marginBottom: 12 }
 
 const card = {
   background: "#1a1a1a",
@@ -218,9 +240,7 @@ const priceRow = {
   marginTop: 6,
 }
 
-const euro = {
-  opacity: 0.8,
-}
+const euro = { opacity: 0.8 }
 
 const priceInput = {
   flex: 1,
@@ -263,4 +283,15 @@ const image = {
   objectFit: "contain",
   margin: "8px 0",
   borderRadius: 6,
+}
+
+const fileInput = {
+  marginTop: 6,
+  color: "#fff",
+}
+
+const uploadingText = {
+  fontSize: 12,
+  opacity: 0.7,
+  marginTop: 4,
 }
