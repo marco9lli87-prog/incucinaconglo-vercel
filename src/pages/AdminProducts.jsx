@@ -7,6 +7,7 @@ export default function AdminProducts() {
 
   const [name, setName] = useState("")
   const [price, setPrice] = useState("")
+  const [newImage, setNewImage] = useState(null)
   const [uploading, setUploading] = useState(false)
 
   useEffect(() => {
@@ -28,9 +29,8 @@ export default function AdminProducts() {
      UPLOAD IMMAGINE
      ====================== */
 
-  const uploadImage = async (file, productId) => {
-    if (!file) return
-    setUploading(true)
+  const uploadImageForProduct = async (file, productId) => {
+    if (!file) return null
 
     const ext = file.name.split(".").pop()
     const fileName = `${productId}.${ext}`
@@ -43,23 +43,19 @@ export default function AdminProducts() {
       .from("products")
       .getPublicUrl(fileName)
 
-    await supabase
-      .from("products")
-      .update({ image_url: data.publicUrl })
-      .eq("id", productId)
-
-    setUploading(false)
-    loadProducts()
+    return data.publicUrl
   }
 
   /* ======================
-     CRUD PRODOTTI
+     CREAZIONE PRODOTTO
      ====================== */
 
   const addProduct = async () => {
     if (!name || !price) return
+    setUploading(true)
 
-    const { data } = await supabase
+    // 1. crea prodotto
+    const { data: product } = await supabase
       .from("products")
       .insert({
         name,
@@ -69,12 +65,31 @@ export default function AdminProducts() {
       .select()
       .single()
 
+    // 2. upload immagine (se presente)
+    if (newImage) {
+      const imageUrl = await uploadImageForProduct(
+        newImage,
+        product.id
+      )
+
+      await supabase
+        .from("products")
+        .update({ image_url: imageUrl })
+        .eq("id", product.id)
+    }
+
+    // reset form
     setName("")
     setPrice("")
-    loadProducts()
+    setNewImage(null)
+    setUploading(false)
 
-    return data
+    loadProducts()
   }
+
+  /* ======================
+     CRUD PRODOTTI
+     ====================== */
 
   const updateProduct = async (id, fields) => {
     await supabase.from("products").update(fields).eq("id", id)
@@ -88,6 +103,18 @@ export default function AdminProducts() {
     if (!ok) return
 
     await supabase.from("products").delete().eq("id", id)
+    loadProducts()
+  }
+
+  const uploadImageExisting = async (file, productId) => {
+    setUploading(true)
+    const imageUrl = await uploadImageForProduct(file, productId)
+    await supabase
+      .from("products")
+      .update({ image_url: imageUrl })
+      .eq("id", productId)
+
+    setUploading(false)
     loadProducts()
   }
 
@@ -120,8 +147,19 @@ export default function AdminProducts() {
           />
         </div>
 
-        <button style={btnPrimary} onClick={addProduct}>
-          Aggiungi
+        <input
+          type="file"
+          accept="image/*"
+          style={fileInput}
+          onChange={e => setNewImage(e.target.files[0])}
+        />
+
+        <button
+          style={btnPrimary}
+          onClick={addProduct}
+          disabled={uploading}
+        >
+          {uploading ? "Caricamento..." : "Aggiungi"}
         </button>
       </div>
 
@@ -168,9 +206,7 @@ export default function AdminProducts() {
             style={input}
             value={product.name}
             onChange={e =>
-              updateProduct(product.id, {
-                name: e.target.value,
-              })
+              updateProduct(product.id, { name: e.target.value })
             }
           />
 
@@ -192,11 +228,9 @@ export default function AdminProducts() {
             accept="image/*"
             style={fileInput}
             onChange={e =>
-              uploadImage(e.target.files[0], product.id)
+              uploadImageExisting(e.target.files[0], product.id)
             }
           />
-
-          {uploading && <div style={uploadingText}>Upload in corso…</div>}
         </div>
       ))}
     </div>
@@ -251,6 +285,11 @@ const priceInput = {
   borderRadius: 4,
 }
 
+const fileInput = {
+  marginTop: 6,
+  color: "#fff",
+}
+
 const btnPrimary = {
   marginTop: 10,
   padding: 8,
@@ -283,15 +322,4 @@ const image = {
   objectFit: "contain",
   margin: "8px 0",
   borderRadius: 6,
-}
-
-const fileInput = {
-  marginTop: 6,
-  color: "#fff",
-}
-
-const uploadingText = {
-  fontSize: 12,
-  opacity: 0.7,
-  marginTop: 4,
 }
