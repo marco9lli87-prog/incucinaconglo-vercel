@@ -4,11 +4,13 @@ import { supabase } from "../lib/supabase"
 export default function AdminProducts() {
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
+  const [uploading, setUploading] = useState(false)
 
+  // Nuovo prodotto
   const [name, setName] = useState("")
+  const [unit, setUnit] = useState("kg") // DEFAULT
   const [price, setPrice] = useState("")
   const [newImage, setNewImage] = useState(null)
-  const [uploading, setUploading] = useState(false)
 
   useEffect(() => {
     loadProducts()
@@ -20,16 +22,15 @@ export default function AdminProducts() {
       .from("products")
       .select("*")
       .order("name")
-
     setProducts(data || [])
     setLoading(false)
   }
 
-  /* ======================
+  /* =========================
      UPLOAD IMMAGINE
-     ====================== */
+     ========================= */
 
-  const uploadImageForProduct = async (file, productId) => {
+  const uploadImage = async (file, productId) => {
     if (!file) return null
 
     const ext = file.name.split(".").pop()
@@ -46,50 +47,50 @@ export default function AdminProducts() {
     return data.publicUrl
   }
 
-  /* ======================
-     CREAZIONE PRODOTTO
-     ====================== */
+  /* =========================
+     CREA PRODOTTO
+     ========================= */
 
   const addProduct = async () => {
     if (!name || !price) return
     setUploading(true)
 
-    // 1. crea prodotto
-    const { data: product } = await supabase
+    const { data: product, error } = await supabase
       .from("products")
       .insert({
         name,
+        unit: unit || "kg",
         price: Number(price),
         active: true,
       })
       .select()
       .single()
 
-    // 2. upload immagine (se presente)
-    if (newImage) {
-      const imageUrl = await uploadImageForProduct(
-        newImage,
-        product.id
-      )
+    if (error) {
+      alert(error.message)
+      setUploading(false)
+      return
+    }
 
+    if (newImage) {
+      const imageUrl = await uploadImage(newImage, product.id)
       await supabase
         .from("products")
         .update({ image_url: imageUrl })
         .eq("id", product.id)
     }
 
-    // reset form
     setName("")
+    setUnit("kg")
     setPrice("")
     setNewImage(null)
     setUploading(false)
-
     loadProducts()
   }
 
-  /* ======================
-     CRUD PRODOTTI
-     ====================== */
+  /* =========================
+     UPDATE / DELETE
+     ========================= */
 
   const updateProduct = async (id, fields) => {
     await supabase.from("products").update(fields).eq("id", id)
@@ -108,25 +109,24 @@ export default function AdminProducts() {
 
   const uploadImageExisting = async (file, productId) => {
     setUploading(true)
-    const imageUrl = await uploadImageForProduct(file, productId)
+    const imageUrl = await uploadImage(file, productId)
     await supabase
       .from("products")
       .update({ image_url: imageUrl })
       .eq("id", productId)
-
     setUploading(false)
     loadProducts()
   }
 
   if (loading) {
-    return <div style={page}>Caricamento prodotti...</div>
+    return <div style={page}>Caricamento prodotti…</div>
   }
 
   return (
     <div style={page}>
       <h1 style={title}>Prodotti</h1>
 
-      {/* NUOVO PRODOTTO */}
+      {/* ================= NUOVO PRODOTTO ================= */}
       <div style={card}>
         <strong>Aggiungi prodotto</strong>
 
@@ -135,6 +135,13 @@ export default function AdminProducts() {
           placeholder="Nome prodotto"
           value={name}
           onChange={e => setName(e.target.value)}
+        />
+
+        <input
+          style={input}
+          placeholder="Unità (kg, l, pz…) — default kg"
+          value={unit}
+          onChange={e => setUnit(e.target.value)}
         />
 
         <div style={priceRow}>
@@ -159,16 +166,18 @@ export default function AdminProducts() {
           onClick={addProduct}
           disabled={uploading}
         >
-          {uploading ? "Caricamento..." : "Aggiungi"}
+          {uploading ? "Caricamento…" : "Aggiungi prodotto"}
         </button>
       </div>
 
-      {/* LISTA PRODOTTI */}
+      {/* ================= LISTA PRODOTTI ================= */}
       {products.map(product => (
         <div key={product.id} style={card}>
           <div style={rowBetween}>
             <strong>{product.name}</strong>
-            <span>€ {Number(product.price).toFixed(2)}</span>
+            <span>
+              € {Number(product.price).toFixed(2)} / {product.unit}
+            </span>
           </div>
 
           {product.image_url && (
@@ -186,9 +195,7 @@ export default function AdminProducts() {
                 background: product.active ? "#16a34a" : "#555",
               }}
               onClick={() =>
-                updateProduct(product.id, {
-                  active: !product.active,
-                })
+                updateProduct(product.id, { active: !product.active })
               }
             >
               {product.active ? "Attivo" : "Non attivo"}
@@ -207,6 +214,14 @@ export default function AdminProducts() {
             value={product.name}
             onChange={e =>
               updateProduct(product.id, { name: e.target.value })
+            }
+          />
+
+          <input
+            style={input}
+            value={product.unit}
+            onChange={e =>
+              updateProduct(product.id, { unit: e.target.value || "kg" })
             }
           />
 
