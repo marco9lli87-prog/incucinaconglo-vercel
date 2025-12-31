@@ -625,3 +625,123 @@ img {
   color: #d4af37;
   font-weight: 600;
 }
+
+/* ===== Premium Loader (In Cucina con Glò) ===== */
+.loader-fade.is-in {
+  opacity: 1;
+  transition: opacity 420ms ease;
+}
+.loader-fade.is-out {
+  opacity: 0;
+  transition: opacity 420ms ease;
+  pointer-events: none;
+}
+
+.loader-overlay {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at 50% 35%, rgba(212,175,55,0.08), rgba(15,15,15,0.96) 55%);
+  backdrop-filter: blur(10px);
+  display: grid;
+  place-items: center;
+  z-index: 9999;
+}
+
+.loader-card {
+  width: min(460px, 92vw);
+  padding: 26px 18px 22px;
+  border-radius: 22px;
+  background: rgba(26, 26, 26, 0.72);
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.6);
+  text-align: center;
+  transform: translateY(6px);
+}
+
+.loader-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.loader-icon { height: 30px; width: auto; opacity: 0.96; }
+.loader-text { height: 24px; width: auto; opacity: 0.96; }
+
+.loader-sub {
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 14px;
+  line-height: 1.45;
+  margin-top: 10px;
+}
+
+.loader-ring {
+  width: 58px;
+  height: 58px;
+  margin: 4px auto 0;
+  border-radius: 50%;
+  border: 2px solid rgba(212,175,55,0.18);
+  border-top-color: rgba(212,175,55,0.95);
+  animation: ringSpin 0.9s linear infinite;
+  position: relative;
+}
+
+.loader-ring::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(212,175,55,0.18), transparent 60%);
+  filter: blur(10px);
+  animation: glowPulse 1.35s ease-in-out infinite;
+}
+
+.loader-glowline {
+  height: 2px;
+  width: 100px;
+  margin: 14px auto 0;
+  border-radius: 999px;
+  background: rgba(212,175,55,0.9);
+  box-shadow: 0 0 18px rgba(212,175,55,0.45);
+  opacity: 0.7;
+  animation: linePulse 1.6s ease-in-out infinite;
+}
+
+/* Entrance animations */
+.animated-in {
+  animation: enterUp 520ms cubic-bezier(.2,.9,.2,1) both;
+}
+.animated-in-delay {
+  animation: enterUp 520ms 120ms cubic-bezier(.2,.9,.2,1) both;
+}
+.animated-in-delay2 {
+  animation: enterUp 520ms 220ms cubic-bezier(.2,.9,.2,1) both;
+}
+.animated-in-delay3 {
+  animation: enterUp 520ms 320ms cubic-bezier(.2,.9,.2,1) both;
+}
+
+@keyframes enterUp {
+  from { opacity: 0; transform: translateY(14px); filter: blur(2px); }
+  to   { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+
+@keyframes ringSpin { to { transform: rotate(360deg); } }
+
+@keyframes glowPulse {
+  0%, 100% { opacity: 0.35; transform: scale(0.95); }
+  50% { opacity: 0.75; transform: scale(1.05); }
+}
+
+@keyframes linePulse {
+  0%, 100% { transform: scaleX(0.75); opacity: 0.45; }
+  50% { transform: scaleX(1); opacity: 0.9; }
+}
+
+/* Rispetta chi preferisce meno animazioni */
+@media (prefers-reduced-motion: reduce) {
+  .loader-ring, .loader-ring::after, .loader-glowline { animation: none !important; }
+  .animated-in, .animated-in-delay, .animated-in-delay2, .animated-in-delay3 { animation: none !important; }
+  .loader-fade.is-in, .loader-fade.is-out { transition: none !important; }
+}
