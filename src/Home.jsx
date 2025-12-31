@@ -1,19 +1,61 @@
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { supabase } from "./lib/supabase"
 import Checkout from "./components/Checkout"
 
-function LoaderOverlay({ message = "Sto preparando il menù…" }) {
+function LoaderOverlay({ loading }) {
+  const messages = useMemo(
+    () => [
+      "Impasto a mano…",
+      "Stendo la sfoglia…",
+      "Taglio con cura…",
+      "Preparo il menù…",
+      "Quasi pronto…",
+    ],
+    []
+  )
+
+  const [msgIndex, setMsgIndex] = useState(0)
+  const timerRef = useRef(null)
+
+  useEffect(() => {
+    // reset
+    setMsgIndex(0)
+
+    if (!loading) {
+      if (timerRef.current) clearInterval(timerRef.current)
+      return
+    }
+
+    // cambia micro-testo
+    timerRef.current = setInterval(() => {
+      setMsgIndex(i => (i + 1) % messages.length)
+    }, 650)
+
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current)
+    }
+  }, [loading, messages.length])
+
   return (
     <div className="loader-overlay" role="status" aria-live="polite">
       <div className="loader-card">
-        <div className="loader-brand">
-          <img src="/logo-icon.png" alt="" />
-          <img src="/logo-text.png" alt="In Cucina con Glò" />
+        <div className="loader-brand animated-in">
+          <img src="/logo-icon.png" className="loader-icon" alt="" />
+          <img
+            src="/logo-text.png"
+            className="loader-text"
+            alt="In Cucina con Glò"
+          />
         </div>
 
-        <div className="loader-spinner" />
-        <div className="loader-sub">{message}</div>
-        <div className="loader-glow" />
+        <div className="loader-ring animated-in-delay" />
+
+        {/* micro-testo con piccola transizione */}
+        <div key={msgIndex} className="loader-sub animated-in-delay2">
+          {messages[msgIndex]}
+        </div>
+
+        <div className="loader-glowline animated-in-delay3" />
       </div>
     </div>
   )
@@ -24,14 +66,15 @@ export default function Home() {
   const [cart, setCart] = useState([])
   const [showCheckout, setShowCheckout] = useState(false)
 
-  // LOADING / ERROR
-  const [loading, setLoading] = useState(true)
-  const [loadError, setLoadError] = useState("")
-
   // DATI CLIENTE
   const [customerName, setCustomerName] = useState("")
   const [customerPhone, setCustomerPhone] = useState("")
   const [notes, setNotes] = useState("")
+
+  // LOADING / ERROR
+  const [loading, setLoading] = useState(true)
+  const [loaderVisible, setLoaderVisible] = useState(true) // per fade-out
+  const [loadError, setLoadError] = useState("")
 
   /* =========================
      LOAD PRODUCTS
@@ -44,6 +87,7 @@ export default function Home() {
 
   const fetchProducts = async () => {
     setLoading(true)
+    setLoaderVisible(true)
     setLoadError("")
 
     const { data, error } = await supabase
@@ -57,11 +101,17 @@ export default function Home() {
       setLoadError("Non riesco a caricare il menù. Riprova tra poco.")
       setProducts([])
       setLoading(false)
+
+      // anche in errore, fai uscire il loader con stile
+      setTimeout(() => setLoaderVisible(false), 450)
       return
     }
 
     setProducts(data || [])
     setLoading(false)
+
+    // fade-out elegante
+    setTimeout(() => setLoaderVisible(false), 450)
   }
 
   /* =========================
@@ -124,12 +174,14 @@ export default function Home() {
       return
     }
 
+    if (!cart.length) return
+
     const total = cart.reduce(
       (sum, item) => sum + item.price * item.quantity,
       0
     )
 
-    // 1. ORDINE (COLONNE CORRETTE)
+    // 1. ORDINE
     const { data: order, error: orderError } = await supabase
       .from("orders")
       .insert({
@@ -143,6 +195,7 @@ export default function Home() {
       .single()
 
     if (orderError) {
+      console.error(orderError)
       alert("Errore nell’invio dell’ordine")
       return
     }
@@ -160,6 +213,7 @@ export default function Home() {
       .insert(items)
 
     if (itemsError) {
+      console.error(itemsError)
       alert("Errore nel salvataggio dei prodotti")
       return
     }
@@ -180,14 +234,22 @@ export default function Home() {
 
   return (
     <div className="home">
-      {/* LOADER OVERLAY */}
-      {loading && <LoaderOverlay />}
+      {/* LOADER overlay + fade */}
+      {loaderVisible && (
+        <div className={`loader-fade ${loading ? "is-in" : "is-out"}`}>
+          <LoaderOverlay loading={loading} />
+        </div>
+      )}
 
       {/* HEADER */}
       <header className="header">
         <div className="header-inner">
           <img src="/logo-icon.png" className="header-logo-icon" alt="" />
-          <img src="/logo-text.png" className="header-logo-text" alt="In Cucina con Glò" />
+          <img
+            src="/logo-text.png"
+            className="header-logo-text"
+            alt="In Cucina con Glò"
+          />
         </div>
       </header>
 
@@ -208,7 +270,7 @@ export default function Home() {
         </p>
       </section>
 
-      {/* ERRORE CARICAMENTO */}
+      {/* ERRORE + RETRY */}
       {loadError && (
         <div className="load-error">
           <p>{loadError}</p>
@@ -237,6 +299,7 @@ export default function Home() {
 
                 <div className="product-info">
                   <div className="product-name">{product.name}</div>
+
                   <div className="product-price">
                     € {Number(product.price).toFixed(2)}
                     {product.unit ? ` / ${product.unit}` : ""}
