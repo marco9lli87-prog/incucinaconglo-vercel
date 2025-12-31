@@ -2,14 +2,16 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import { supabase } from "./lib/supabase"
 import Checkout from "./components/Checkout"
 
+const MIN_SPLASH_MS = 2800 // <-- cambia qui (es. 2500 / 3000)
+
 function LoaderOverlay({ loading }) {
   const messages = useMemo(
     () => [
-      "Impasto a mano…",
-      "Stendo la sfoglia…",
-      "Taglio con cura…",
-      "Preparo il menù…",
-      "Quasi pronto…",
+      "Impasto a mano",
+      "Stendo la sfoglia",
+      "Taglio con cura",
+      "Preparo il menù",
+      "Quasi pronto",
     ],
     []
   )
@@ -18,7 +20,6 @@ function LoaderOverlay({ loading }) {
   const timerRef = useRef(null)
 
   useEffect(() => {
-    // reset
     setMsgIndex(0)
 
     if (!loading) {
@@ -26,7 +27,6 @@ function LoaderOverlay({ loading }) {
       return
     }
 
-    // cambia micro-testo
     timerRef.current = setInterval(() => {
       setMsgIndex(i => (i + 1) % messages.length)
     }, 650)
@@ -50,9 +50,11 @@ function LoaderOverlay({ loading }) {
 
         <div className="loader-ring animated-in-delay" />
 
-        {/* micro-testo con piccola transizione */}
-        <div key={msgIndex} className="loader-sub animated-in-delay2">
-          {messages[msgIndex]}
+        <div className="loader-sub-wrap animated-in-delay2">
+          <div key={msgIndex} className="loader-sub fade-swap">
+            <span className="loader-msg">{messages[msgIndex]}</span>
+            <span className="loader-dots" aria-hidden="true"></span>
+          </div>
         </div>
 
         <div className="loader-glowline animated-in-delay3" />
@@ -73,28 +75,43 @@ export default function Home() {
 
   // LOADING / ERROR
   const [loading, setLoading] = useState(true)
-  const [loaderVisible, setLoaderVisible] = useState(true) // per fade-out
+  const [loaderVisible, setLoaderVisible] = useState(true)
   const [loadError, setLoadError] = useState("")
 
-  /* =========================
-     LOAD PRODUCTS
-     ========================= */
+  // timer di splash minimo
+  const splashStartRef = useRef(Date.now())
 
   useEffect(() => {
+    // ad ogni mount (ogni refresh/apertura pagina) riparte sempre
+    splashStartRef.current = Date.now()
     fetchProducts()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  const waitMinSplash = async () => {
+    const elapsed = Date.now() - splashStartRef.current
+    const remaining = Math.max(0, MIN_SPLASH_MS - elapsed)
+    if (remaining > 0) {
+      await new Promise(res => setTimeout(res, remaining))
+    }
+  }
 
   const fetchProducts = async () => {
     setLoading(true)
     setLoaderVisible(true)
     setLoadError("")
+    splashStartRef.current = Date.now()
 
-    const { data, error } = await supabase
+    // fetch e splash in parallelo
+    const fetchPromise = supabase
       .from("products")
       .select("*")
       .eq("active", true)
       .order("created_at", { ascending: true })
+
+    const [result] = await Promise.all([fetchPromise, waitMinSplash()])
+
+    const { data, error } = result
 
     if (error) {
       console.error("Errore fetch products:", error)
@@ -102,7 +119,7 @@ export default function Home() {
       setProducts([])
       setLoading(false)
 
-      // anche in errore, fai uscire il loader con stile
+      // fade-out elegante
       setTimeout(() => setLoaderVisible(false), 450)
       return
     }
@@ -173,7 +190,6 @@ export default function Home() {
       alert("Inserisci nome e numero WhatsApp")
       return
     }
-
     if (!cart.length) return
 
     const total = cart.reduce(
@@ -181,7 +197,6 @@ export default function Home() {
       0
     )
 
-    // 1. ORDINE
     const { data: order, error: orderError } = await supabase
       .from("orders")
       .insert({
@@ -200,7 +215,6 @@ export default function Home() {
       return
     }
 
-    // 2. RIGHE ORDINE
     const items = cart.map(item => ({
       order_id: order.id,
       product_id: item.id,
@@ -218,7 +232,6 @@ export default function Home() {
       return
     }
 
-    // 3. RESET
     setCart([])
     setCustomerName("")
     setCustomerPhone("")
@@ -227,10 +240,6 @@ export default function Home() {
 
     alert("Ordine inviato! Ti contatterò a breve su WhatsApp 😊")
   }
-
-  /* =========================
-     RENDER
-     ========================= */
 
   return (
     <div className="home">
@@ -299,7 +308,6 @@ export default function Home() {
 
                 <div className="product-info">
                   <div className="product-name">{product.name}</div>
-
                   <div className="product-price">
                     € {Number(product.price).toFixed(2)}
                     {product.unit ? ` / ${product.unit}` : ""}
@@ -320,10 +328,7 @@ export default function Home() {
 
       {/* CARRELLO */}
       {cart.length > 0 && (
-        <button
-          className="cart-button"
-          onClick={() => setShowCheckout(true)}
-        >
+        <button className="cart-button" onClick={() => setShowCheckout(true)}>
           Carrello · {cart.reduce((s, i) => s + i.quantity, 0)}
         </button>
       )}
