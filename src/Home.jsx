@@ -2,10 +2,31 @@ import { useEffect, useState } from "react"
 import { supabase } from "./lib/supabase"
 import Checkout from "./components/Checkout"
 
+function LoaderOverlay({ message = "Sto preparando il menù…" }) {
+  return (
+    <div className="loader-overlay" role="status" aria-live="polite">
+      <div className="loader-card">
+        <div className="loader-brand">
+          <img src="/logo-icon.png" alt="" />
+          <img src="/logo-text.png" alt="In Cucina con Glò" />
+        </div>
+
+        <div className="loader-spinner" />
+        <div className="loader-sub">{message}</div>
+        <div className="loader-glow" />
+      </div>
+    </div>
+  )
+}
+
 export default function Home() {
   const [products, setProducts] = useState([])
   const [cart, setCart] = useState([])
   const [showCheckout, setShowCheckout] = useState(false)
+
+  // LOADING / ERROR
+  const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState("")
 
   // DATI CLIENTE
   const [customerName, setCustomerName] = useState("")
@@ -18,16 +39,29 @@ export default function Home() {
 
   useEffect(() => {
     fetchProducts()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const fetchProducts = async () => {
+    setLoading(true)
+    setLoadError("")
+
     const { data, error } = await supabase
       .from("products")
       .select("*")
       .eq("active", true)
       .order("created_at", { ascending: true })
 
-    if (!error) setProducts(data)
+    if (error) {
+      console.error("Errore fetch products:", error)
+      setLoadError("Non riesco a caricare il menù. Riprova tra poco.")
+      setProducts([])
+      setLoading(false)
+      return
+    }
+
+    setProducts(data || [])
+    setLoading(false)
   }
 
   /* =========================
@@ -146,11 +180,14 @@ export default function Home() {
 
   return (
     <div className="home">
+      {/* LOADER OVERLAY */}
+      {loading && <LoaderOverlay />}
+
       {/* HEADER */}
       <header className="header">
         <div className="header-inner">
-          <img src="/logo-icon.png" className="header-logo-icon" />
-          <img src="/logo-text.png" className="header-logo-text" />
+          <img src="/logo-icon.png" className="header-logo-icon" alt="" />
+          <img src="/logo-text.png" className="header-logo-text" alt="In Cucina con Glò" />
         </div>
       </header>
 
@@ -171,34 +208,52 @@ export default function Home() {
         </p>
       </section>
 
-      {/* PRODOTTI */}
-      <section className="products">
-        <div className="products-grid">
-          {products.map((product, i) => (
-            <div
-              key={product.id}
-              className="product-card fade-in"
-              style={{ animationDelay: `${i * 0.05}s` }}
-            >
-              <img src={product.image_url} className="product-image" />
-
-              <div className="product-info">
-                <div className="product-name">{product.name}</div>
-                <div className="product-price">
-                  € {Number(product.price).toFixed(2)}
-                </div>
-
-                <button
-                  className="product-add"
-                  onClick={() => addToCart(product)}
-                >
-                  Aggiungi
-                </button>
-              </div>
-            </div>
-          ))}
+      {/* ERRORE CARICAMENTO */}
+      {loadError && (
+        <div className="load-error">
+          <p>{loadError}</p>
+          <button className="retry-btn" onClick={fetchProducts}>
+            Riprova
+          </button>
         </div>
-      </section>
+      )}
+
+      {/* PRODOTTI */}
+      {!loadError && (
+        <section className="products">
+          <div className="products-grid">
+            {products.map((product, i) => (
+              <div
+                key={product.id}
+                className="product-card fade-in"
+                style={{ animationDelay: `${i * 0.05}s` }}
+              >
+                <img
+                  src={product.image_url}
+                  className="product-image"
+                  alt={product.name}
+                  loading="lazy"
+                />
+
+                <div className="product-info">
+                  <div className="product-name">{product.name}</div>
+                  <div className="product-price">
+                    € {Number(product.price).toFixed(2)}
+                    {product.unit ? ` / ${product.unit}` : ""}
+                  </div>
+
+                  <button
+                    className="product-add"
+                    onClick={() => addToCart(product)}
+                  >
+                    Aggiungi
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* CARRELLO */}
       {cart.length > 0 && (
